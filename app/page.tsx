@@ -13,7 +13,7 @@ const categories = [
   { label: "Desserts", icon: "🍰" },
 ];
 
-function TipMeter({ score, dark }) {
+function TipMeter({ score, dark }: { score: number; dark: boolean }) {
   const color = score >= 7 ? "#10b981" : score >= 4 ? "#f59e0b" : "#ef4444";
   const label = score >= 7 ? "Friendly" : score >= 4 ? "Moderate" : "Pressured";
   return (
