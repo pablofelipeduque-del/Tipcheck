@@ -13,7 +13,7 @@ const categories = [
   { label: "Desserts", icon: "🍰" },
 ];
 
-function TipMeter({ score, dark }: { score: number; dark: boolean }) {
+function TipMeter({ score, dark }) {
   const color = score >= 7 ? "#10b981" : score >= 4 ? "#f59e0b" : "#ef4444";
   const label = score >= 7 ? "Friendly" : score >= 4 ? "Moderate" : "Pressured";
   return (
@@ -144,8 +144,9 @@ export default function Home() {
             <nav style={{ display: "flex", gap: "28px" }}>
              {[["Discover", "/"], ["Top Rated", "/"], ["Dining Roulette", "/roulette"], ["About", "/about"]].map(([item, path]) => (
   <a key={item} href={path} style={{ color: muted, fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color 0.2s" }}
-    onMouseEnter={e => e.target.style.color = text}
-    onMouseLeave={e => e.target.style.color = muted}
+onMouseEnter={(e) => (e.currentTarget as HTMLAnchorElement).style.color = text}
+onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
+    
   >{item}</a>
 ))}
             </nav>
