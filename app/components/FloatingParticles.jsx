@@ -17,7 +17,7 @@ export default function FloatingParticles({ count = 20, opacity = 1 }) {
       emoji:    FOOD_EMOJIS[i % FOOD_EMOJIS.length],
       left:     `${pr(i, 0) * 94 + 1}%`,
       size:     `${0.85 + pr(i, 1) * 0.9}rem`,
-      baseOp:   (0.04 + pr(i, 2) * 0.045) * opacity,
+      baseOp:   (0.06 + pr(i, 2) * 0.07) * opacity,
       duration: `${16 + pr(i, 3) * 22}s`,
       delay:    `-${pr(i, 4) * 24}s`,
       swayPx:   Math.round(-28 + pr(i, 5) * 56),
