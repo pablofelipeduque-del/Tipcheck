@@ -3,6 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
 import FloatingParticles from "../../components/FloatingParticles";
+import { useTheme } from "../../components/useTheme";
 
 function ScoreBar({ score }) {
   const color = score >= 7 ? "#10b981" : score >= 4 ? "#f59e0b" : "#ef4444";
@@ -26,6 +27,7 @@ function StatPill({ icon, label, value, highlight }) {
 export default function RestaurantPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { dark } = useTheme();
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reports, setReports] = useState([]);

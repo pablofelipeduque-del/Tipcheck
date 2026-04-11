@@ -2,10 +2,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import FloatingParticles from "../components/FloatingParticles";
+import { useTheme } from "../components/useTheme";
 
 export default function AboutPage() {
   const router = useRouter();
-  const [dark, setDark] = useState(true);
+  const { dark, toggle: toggleDark } = useTheme();
 
   const bg = dark ? "#030712" : "#f9fafb";
   const surface = dark ? "#0d1117" : "#ffffff";
@@ -45,7 +46,7 @@ export default function AboutPage() {
             </nav>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ fontSize: "14px" }}>☀️</span>
-              <button className="toggle-btn" onClick={() => setDark(!dark)} style={{ background: dark ? "#f59e0b" : "#d1d5db" }}>
+              <button className="toggle-btn" onClick={toggleDark} style={{ background: dark ? "#f59e0b" : "#d1d5db" }}>
                 <div className="toggle-knob" style={{ left: dark ? "27px" : "3px" }} />
               </button>
               <span style={{ fontSize: "14px" }}>🌙</span>

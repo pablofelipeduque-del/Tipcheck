@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FloatingParticles from "./components/FloatingParticles";
+import { useTheme } from "./components/useTheme";
 
 const categories = [
   { label: "All", icon: "🍽️" },
@@ -77,7 +78,7 @@ function FoodIllustration() {
 
 export default function Home() {
   const router = useRouter();
-  const [dark, setDark] = useState(true);
+  const { dark, toggle: toggleDark } = useTheme();
   const [zip, setZip] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [places, setPlaces] = useState([]);
@@ -155,7 +156,7 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
             {/* Dark/Light Toggle */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ fontSize: "14px" }}>☀️</span>
-              <button className="toggle-btn" onClick={() => setDark(!dark)} style={{ background: dark ? "#f59e0b" : "#d1d5db" }}>
+              <button className="toggle-btn" onClick={toggleDark} style={{ background: dark ? "#f59e0b" : "#d1d5db" }}>
                 <div className="toggle-knob" style={{ left: dark ? "27px" : "3px" }} />
               </button>
               <span style={{ fontSize: "14px" }}>🌙</span>

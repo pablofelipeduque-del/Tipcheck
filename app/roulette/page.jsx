@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import FloatingParticles from "../components/FloatingParticles";
+import { useTheme } from "../components/useTheme";
 
 const CATEGORIES = [
   { label: "Surprise me", icon: "🎲", query: "restaurants" },
@@ -217,7 +218,7 @@ export default function RoulettePage() {
   const router  = useRouter();
   const sounds  = useSoundEngine();
 
-  const [dark,        setDark]        = useState(true);
+  const { dark, toggle: toggleDark } = useTheme();
   const [zip,         setZip]         = useState("");
   const [category,    setCategory]    = useState(CATEGORIES[0]);
   const [minTip,      setMinTip]      = useState(1);
@@ -334,7 +335,7 @@ export default function RoulettePage() {
             </nav>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ fontSize: "14px" }}>☀️</span>
-              <button className="toggle-btn" onClick={() => setDark(!dark)} style={{ background: dark ? "#f59e0b" : "#d1d5db" }}>
+              <button className="toggle-btn" onClick={toggleDark} style={{ background: dark ? "#f59e0b" : "#d1d5db" }}>
                 <div className="toggle-knob" style={{ left: dark ? "27px" : "3px" }} />
               </button>
               <span style={{ fontSize: "14px" }}>🌙</span>
