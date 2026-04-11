@@ -2,6 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
+import FloatingParticles from "../../components/FloatingParticles";
 
 function ScoreBar({ score }) {
   const color = score >= 7 ? "#10b981" : score >= 4 ? "#f59e0b" : "#ef4444";
@@ -122,7 +123,8 @@ export default function RestaurantPage() {
         .comment-card:hover { border-color: #374151; }
       `}</style>
 
-      <main style={{ minHeight: "100vh", background: "#030712", color: "white", fontFamily: "'DM Sans', sans-serif" }}>
+      <FloatingParticles count={16} opacity={0.7} />
+      <main style={{ minHeight: "100vh", background: "#030712", color: "white", fontFamily: "'DM Sans', sans-serif", position: "relative", zIndex: 1 }}>
         <header style={{ borderBottom: "1px solid #111827", padding: "18px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "rgba(3,7,18,0.92)", backdropFilter: "blur(12px)", zIndex: 100 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => router.push("/")}>
             <div style={{ width: "36px", height: "36px", background: "linear-gradient(135deg, #f59e0b, #d97706)", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>💸</div>

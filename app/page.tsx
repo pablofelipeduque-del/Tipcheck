@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import FloatingParticles from "./components/FloatingParticles";
 
 const categories = [
   { label: "All", icon: "🍽️" },
@@ -130,7 +131,8 @@ export default function Home() {
         .float { animation: float 4s ease-in-out infinite; }
       `}</style>
 
-      <main style={{ minHeight: "100vh", background: bg, color: text, fontFamily: "'DM Sans', sans-serif", transition: "all 0.3s" }}>
+      <FloatingParticles count={22} />
+      <main style={{ minHeight: "100vh", background: bg, color: text, fontFamily: "'DM Sans', sans-serif", transition: "all 0.3s", position: "relative", zIndex: 1 }}>
 
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "18px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100, transition: "all 0.3s" }}>

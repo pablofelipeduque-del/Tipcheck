@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import FloatingParticles from "../components/FloatingParticles";
 
 export default function AboutPage() {
   const router = useRouter();
@@ -25,7 +26,8 @@ export default function AboutPage() {
         .value-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); border-color: #f59e0b !important; }
       `}</style>
 
-      <main style={{ minHeight: "100vh", background: bg, color: text, fontFamily: "'DM Sans', sans-serif", transition: "all 0.3s" }}>
+      <FloatingParticles count={18} />
+      <main style={{ minHeight: "100vh", background: bg, color: text, fontFamily: "'DM Sans', sans-serif", transition: "all 0.3s", position: "relative", zIndex: 1 }}>
 
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "18px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100 }}>
@@ -77,7 +79,7 @@ export default function AboutPage() {
               In recent years, tipping has been weaponized. Business owners who refuse to pay their employees honest, living wages have quietly shifted that burden onto customers. What was once a genuine gesture of appreciation for exceptional service has been twisted into a mandatory surcharge — enforced through guilt, awkward tablet screens, and social pressure.
             </p>
             <p style={{ color: muted, fontSize: "16px", lineHeight: 1.9, marginBottom: "16px" }}>
-              We all know what service is. <strong style={{ color: text }}>Service is a waiter who takes your order, refills your drink, and checks on your table throughout the night.</strong> Service is not someone handing you a pre-packaged sandwich, a barista who presses a button on a machine, or a cashier who swipes your card and turns a screen toward you before you've even seen your total.
+              We all know what service is. <strong style={{ color: text }}>Service is a waiter who takes your order, refills your drink, and checks on your table throughout the night.</strong> Service is not someone handing you a pre-packaged sandwich, a barista who presses a button on a machine, or a cashier who swipes your card and turns a screen toward you before you&apos;ve even seen your total.
             </p>
             <p style={{ color: muted, fontSize: "16px", lineHeight: 1.9 }}>
               <strong style={{ color: text }}>You should never feel pressured to tip for no service.</strong> And you should never have to wonder if a business is going to make you feel guilty for simply making a purchase.
