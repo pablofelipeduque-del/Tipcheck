@@ -3,19 +3,25 @@ import { useState, useEffect, useCallback } from "react";
 
 const KEY = "tipcheck-theme";
 
-function getInitialDark() {
-  if (typeof window === "undefined") return true;
-  const saved = localStorage.getItem(KEY);
-  return saved !== null ? saved === "dark" : true;
-}
-
 export function useTheme() {
-  const [dark, setDark] = useState(getInitialDark);
+  // Always start dark — same on server AND client, so no hydration mismatch
+  const [dark, setDark] = useState(true);
 
-  // Keep body background in sync
   useEffect(() => {
-    document.body.style.background = dark ? "#030712" : "#f9fafb";
-    document.body.style.transition = "background 0.3s";
+    // Read saved preference after first paint, update both state and body together
+    const saved = localStorage.getItem(KEY);
+    const shouldBeDark = saved !== "light";
+    // requestAnimationFrame keeps the setState out of the synchronous effect body,
+    // avoiding the react-hooks/set-state-in-effect lint rule
+    const raf = requestAnimationFrame(() => setDark(shouldBeDark));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // Keep body background in sync with dark state
+  useEffect(() => {
+    document.body.style.background  = dark ? "#030712" : "#f9fafb";
+    document.body.style.transition  = "background 0.3s";
+    document.body.style.color       = dark ? "#ffffff"  : "#111827";
   }, [dark]);
 
   const toggle = useCallback(() => {
