@@ -3,18 +3,21 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
 
-function MiniMeter({ score, label }) {
+function ScoreBar({ score }) {
   const color = score >= 7 ? "#10b981" : score >= 4 ? "#f59e0b" : "#ef4444";
-  const textColor = score >= 7 ? "#10b981" : score >= 4 ? "#f59e0b" : "#ef4444";
   return (
-    <div style={{ marginBottom: "12px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-        <span style={{ color: "#6b7280" }}>{label}</span>
-        <span style={{ color: textColor, fontWeight: 700 }}>{score}/10</span>
-      </div>
-      <div style={{ width: "100%", background: "#1f2937", borderRadius: "999px", height: "6px" }}>
-        <div style={{ width: `${score * 10}%`, background: color, height: "6px", borderRadius: "999px", transition: "width 0.6s ease" }} />
-      </div>
+    <div style={{ width: "100%", background: "#1f2937", borderRadius: "999px", height: "6px" }}>
+      <div style={{ width: `${score * 10}%`, background: color, height: "6px", borderRadius: "999px", transition: "width 0.6s ease" }} />
+    </div>
+  );
+}
+
+function StatPill({ icon, label, value, highlight }) {
+  return (
+    <div style={{ background: "#111827", border: "1px solid #1f2937", borderRadius: "16px", padding: "16px 20px", flex: 1, minWidth: "120px" }}>
+      <div style={{ fontSize: "22px", marginBottom: "8px" }}>{icon}</div>
+      <div style={{ fontFamily: "'Syne', sans-serif", fontSize: "22px", fontWeight: 800, color: highlight || "white", marginBottom: "4px" }}>{value}</div>
+      <div style={{ color: "#6b7280", fontSize: "12px", fontWeight: 500 }}>{label}</div>
     </div>
   );
 }
@@ -24,10 +27,10 @@ export default function RestaurantPage() {
   const router = useRouter();
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reports, setReports] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [reportCount, setReportCount] = useState(0);
   const [form, setForm] = useState({
     pressured: null,
     tip_added: null,
@@ -51,9 +54,10 @@ export default function RestaurantPage() {
     async function fetchReports() {
       const { data } = await supabase
         .from("tip_reports")
-        .select("score")
-        .eq("place_id", id);
-      if (data) setReportCount(data.length);
+        .select("score, pressured, tip_added, counter_order, comment, created_at")
+        .eq("place_id", id)
+        .order("created_at", { ascending: false });
+      if (data) setReports(data);
     }
 
     fetchPlace();
@@ -67,7 +71,7 @@ export default function RestaurantPage() {
     }
     setSubmitting(true);
     try {
-      await supabase.from("tip_reports").insert([{
+      const { data: newReport } = await supabase.from("tip_reports").insert([{
         place_id: id,
         place_name: place ? place.name : id,
         pressured: form.pressured,
@@ -75,11 +79,12 @@ export default function RestaurantPage() {
         counter_order: form.counter_order,
         score: form.score,
         comment: form.comment,
-      }]);
+      }]).select().single();
+
       setSubmitted(true);
       setShowForm(false);
-      setReportCount(reportCount + 1);
-    } catch (e) {
+      if (newReport) setReports([newReport, ...reports]);
+    } catch {
       alert("Something went wrong. Please try again.");
     }
     setSubmitting(false);
@@ -87,6 +92,19 @@ export default function RestaurantPage() {
 
   const tipColor = place ? (place.tipScore >= 7 ? "#10b981" : place.tipScore >= 4 ? "#f59e0b" : "#ef4444") : "#f59e0b";
   const tipLabel = place ? (place.tipScore >= 7 ? "Friendly" : place.tipScore >= 4 ? "Moderate" : "Pressured") : "Unknown";
+
+  // Community stats
+  const reportCount = reports.length;
+  const avgScore = reportCount > 0
+    ? Math.round((reports.reduce((sum, r) => sum + r.score, 0) / reportCount) * 10) / 10
+    : null;
+  const pctPressured = reportCount > 0
+    ? Math.round((reports.filter(r => r.pressured).length / reportCount) * 100)
+    : null;
+  const pctAutoTip = reportCount > 0
+    ? Math.round((reports.filter(r => r.tip_added).length / reportCount) * 100)
+    : null;
+  const comments = reports.filter(r => r.comment && r.comment.trim().length > 0);
 
   return (
     <>
@@ -98,6 +116,10 @@ export default function RestaurantPage() {
         .yesno-btn:not(.selected):hover { border-color: #f59e0b; color: white; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { width: 40px; height: 40px; border: 3px solid #1f2937; border-top-color: #f59e0b; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-up { animation: fadeUp 0.4s ease forwards; opacity: 0; }
+        .comment-card { background: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 16px 18px; transition: border-color 0.2s; }
+        .comment-card:hover { border-color: #374151; }
       `}</style>
 
       <main style={{ minHeight: "100vh", background: "#030712", color: "white", fontFamily: "'DM Sans', sans-serif" }}>
@@ -127,20 +149,89 @@ export default function RestaurantPage() {
               <p style={{ color: "#6b7280", marginBottom: "6px" }}>📍 {place.address}</p>
               <p style={{ color: "#6b7280", marginBottom: "24px" }}>💬 {place.reviews?.toLocaleString()} reviews</p>
 
-              {/* Tip Score */}
+              {/* Google-based Tip Score */}
               <div style={{ background: "#0d1117", border: "1px solid #1f2937", borderRadius: "20px", padding: "24px", marginBottom: "20px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "8px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
                   <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 700 }}>Tipping Culture Score</h2>
                   <span style={{ fontSize: "20px", fontWeight: 800, color: tipColor }}>{place.tipScore}/10 · {tipLabel}</span>
                 </div>
-                <div style={{ width: "100%", background: "#1f2937", borderRadius: "999px", height: "8px", marginBottom: "16px" }}>
-                  <div style={{ width: `${place.tipScore * 10}%`, background: tipColor, height: "8px", borderRadius: "999px" }} />
-                </div>
-                <p style={{ color: "#6b7280", fontSize: "13px", fontStyle: "italic" }}>"{place.tip}"</p>
-                {reportCount > 0 && (
-                  <p style={{ color: "#4b5563", fontSize: "12px", marginTop: "8px" }}>Based on {reportCount} TipCheck report{reportCount > 1 ? "s" : ""} + review analysis</p>
-                )}
+                <ScoreBar score={place.tipScore} />
+                <p style={{ color: "#6b7280", fontSize: "13px", fontStyle: "italic", marginTop: "12px" }}>&ldquo;{place.tip}&rdquo;</p>
+                <p style={{ color: "#374151", fontSize: "11px", marginTop: "8px", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Based on Google review analysis</p>
               </div>
+
+              {/* Community Reports Section */}
+              {reportCount > 0 && (
+                <div className="fade-up" style={{ background: "#0d1117", border: "1px solid #1f2937", borderRadius: "20px", padding: "24px", marginBottom: "20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "8px" }}>
+                    <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 700 }}>From the Community</h2>
+                    <span style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "4px 12px", fontSize: "12px", color: "#f59e0b", fontWeight: 700 }}>
+                      {reportCount} report{reportCount > 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  {/* Stat pills */}
+                  <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "20px" }}>
+                    <StatPill
+                      icon="🏅"
+                      label="Avg community score"
+                      value={`${avgScore}/10`}
+                      highlight={avgScore >= 7 ? "#10b981" : avgScore >= 4 ? "#f59e0b" : "#ef4444"}
+                    />
+                    <StatPill
+                      icon="😤"
+                      label="felt pressured"
+                      value={`${pctPressured}%`}
+                      highlight={pctPressured > 50 ? "#ef4444" : pctPressured > 25 ? "#f59e0b" : "#10b981"}
+                    />
+                    <StatPill
+                      icon="🧾"
+                      label="had auto-tip added"
+                      value={`${pctAutoTip}%`}
+                      highlight={pctAutoTip > 50 ? "#ef4444" : pctAutoTip > 25 ? "#f59e0b" : "#10b981"}
+                    />
+                  </div>
+
+                  {/* Community avg score bar */}
+                  <div style={{ marginBottom: comments.length > 0 ? "24px" : "0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#6b7280", marginBottom: "6px" }}>
+                      <span style={{ textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Community tip score</span>
+                      <span style={{ color: avgScore >= 7 ? "#10b981" : avgScore >= 4 ? "#f59e0b" : "#ef4444", fontWeight: 700 }}>{avgScore}/10</span>
+                    </div>
+                    <ScoreBar score={avgScore} />
+                  </div>
+
+                  {/* Diner comments */}
+                  {comments.length > 0 && (
+                    <>
+                      <p style={{ color: "#6b7280", fontSize: "12px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+                        What diners said
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        {comments.map((r, i) => (
+                          <div key={i} className="comment-card">
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                              <div style={{ display: "flex", gap: "8px" }}>
+                                {r.pressured && (
+                                  <span style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: "999px", padding: "2px 10px", fontSize: "11px", color: "#ef4444", fontWeight: 600 }}>Felt pressured</span>
+                                )}
+                                {r.tip_added && (
+                                  <span style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "2px 10px", fontSize: "11px", color: "#f59e0b", fontWeight: 600 }}>Auto-tip added</span>
+                                )}
+                                {r.counter_order && (
+                                  <span style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: "999px", padding: "2px 10px", fontSize: "11px", color: "#818cf8", fontWeight: 600 }}>Counter order</span>
+                                )}
+                              </div>
+                              <span style={{ fontSize: "12px", fontWeight: 700, color: r.score >= 7 ? "#10b981" : r.score >= 4 ? "#f59e0b" : "#ef4444" }}>{r.score}/10</span>
+                            </div>
+                            <p style={{ color: "#9ca3af", fontSize: "14px", lineHeight: 1.6 }}>&ldquo;{r.comment}&rdquo;</p>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Report Form */}
               {!submitted ? (
