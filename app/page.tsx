@@ -91,8 +91,6 @@ export default function Home() {
   const border = dark ? "#1f2937" : "#e5e7eb";
   const text = dark ? "#ffffff" : "#111827";
   const muted = dark ? "#6b7280" : "#9ca3af";
-  const subtle = dark ? "#111827" : "#f3f4f6";
-
   async function handleSearch() {
     if (!zip.trim()) return;
     setIsLoading(true);
@@ -174,26 +172,54 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
               Find great places.<br />
               <span style={{ color: "#f59e0b" }}>Skip the tip guilt.</span>
             </h1>
-            <p style={{ color: muted, fontSize: "17px", maxWidth: "480px", marginBottom: "40px", lineHeight: 1.7 }}>
+            <p style={{ color: muted, fontSize: "17px", maxWidth: "480px", marginBottom: "28px", lineHeight: 1.7 }}>
               Discover top-rated restaurants, bakeries, and cafés near you — with real tipping culture scores so you always know what to expect.
             </p>
-            <div style={{ display: "flex", gap: "12px", maxWidth: "520px" }}>
-              <input
-                className="search-input"
-                type="text"
-                placeholder="Enter ZIP code or city..."
-                value={zip}
-                onChange={(e) => setZip(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                style={{ background: surface, border: `1px solid ${border}`, color: text }}
-              />
-              <button className="search-btn" onClick={handleSearch} disabled={isLoading}>
-                {isLoading ? "Searching..." : "Search"}
-              </button>
+
+            {/* Step 1 – Category */}
+            <div style={{ marginBottom: "16px" }}>
+              <p style={{ fontSize: "12px", fontWeight: 700, color: muted, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
+                1 · Pick a category
+              </p>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {categories.map((cat) => (
+                  <button key={cat.label} className="cat-btn"
+                    onClick={() => setActiveCategory(cat.label)}
+                    style={{
+                      background: activeCategory === cat.label ? "#f59e0b" : surface,
+                      color: activeCategory === cat.label ? "#030712" : muted,
+                      borderColor: activeCategory === cat.label ? "#f59e0b" : border,
+                    }}
+                  >
+                    {cat.icon} {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Step 2 – ZIP */}
+            <div style={{ marginBottom: "24px" }}>
+              <p style={{ fontSize: "12px", fontWeight: 700, color: muted, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
+                2 · Enter your location
+              </p>
+              <div style={{ display: "flex", gap: "12px", maxWidth: "520px" }}>
+                <input
+                  className="search-input"
+                  type="text"
+                  placeholder="ZIP code or city..."
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  style={{ background: surface, border: `1px solid ${border}`, color: text }}
+                />
+                <button className="search-btn" onClick={handleSearch} disabled={isLoading}>
+                  {isLoading ? "Searching..." : "Search"}
+                </button>
+              </div>
             </div>
             {hasSearched && !error && (
               <p style={{ color: muted, fontSize: "13px", marginTop: "14px" }}>
-                Showing <span style={{ color: "#f59e0b", fontWeight: 600 }}>"{zip}"</span> · {places.length} places found
+                Showing <span style={{ color: "#f59e0b", fontWeight: 600 }}>&ldquo;{zip}&rdquo;</span> · {places.length} places found
               </p>
             )}
             {error && <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "14px" }}>{error}</p>}
@@ -216,24 +242,6 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
             ))}
           </div>
         </div>
-
-        {/* Categories */}
-        <section style={{ padding: "32px 32px 24px", maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            {categories.map((cat) => (
-              <button key={cat.label} className="cat-btn"
-                onClick={() => setActiveCategory(cat.label)}
-                style={{
-                  background: activeCategory === cat.label ? "#f59e0b" : surface,
-                  color: activeCategory === cat.label ? "#030712" : muted,
-                  borderColor: activeCategory === cat.label ? "#f59e0b" : border,
-                }}
-              >
-                {cat.icon} {cat.label}
-              </button>
-            ))}
-          </div>
-        </section>
 
         {/* Results */}
         <section style={{ padding: "0 32px 80px", maxWidth: "1200px", margin: "0 auto" }}>
@@ -268,7 +276,7 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
                   <p style={{ color: muted, fontSize: "12px", marginBottom: "4px" }}>📍 {place.address}</p>
                   <p style={{ color: muted, fontSize: "12px" }}>💬 {place.reviews.toLocaleString()} reviews</p>
                   <TipMeter score={place.tipScore} dark={dark} />
-                  <p style={{ color: muted, fontSize: "12px", marginTop: "12px", fontStyle: "italic", lineHeight: 1.5 }}>"{place.tip}"</p>
+                  <p style={{ color: muted, fontSize: "12px", marginTop: "12px", fontStyle: "italic", lineHeight: 1.5 }}>&ldquo;{place.tip}&rdquo;</p>
                 </div>
               ))}
             </div>

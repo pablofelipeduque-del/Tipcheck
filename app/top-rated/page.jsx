@@ -5,17 +5,29 @@ import FloatingParticles from "../components/FloatingParticles";
 import { useTheme } from "../components/useTheme";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
+const MIN_SCORE = 8;
 
-function TipBar({ score }) {
-  const color = score >= 7 ? "#10b981" : score >= 4 ? "#f59e0b" : "#ef4444";
-  const label = score >= 7 ? "Friendly" : score >= 4 ? "Moderate" : "Pressured";
+const CATEGORIES = [
+  { label: "All", icon: "🍽️" },
+  { label: "Restaurants", icon: "🥘" },
+  { label: "Bakeries", icon: "🥐" },
+  { label: "Coffee", icon: "☕" },
+  { label: "Fast Food", icon: "🍔" },
+  { label: "Pizza", icon: "🍕" },
+  { label: "Sushi", icon: "🍣" },
+  { label: "Desserts", icon: "🍰" },
+];
+
+function TipBar({ score, dark }) {
+  const color = score >= 8 ? "#10b981" : score >= 6 ? "#f59e0b" : "#ef4444";
+  const label = score >= 8 ? "Excellent" : score >= 6 ? "Friendly" : "Moderate";
   return (
     <div style={{ flex: 1 }}>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "5px" }}>
-        <span style={{ color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Tip Culture</span>
+        <span style={{ color: dark ? "#6b7280" : "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Tip Culture</span>
         <span style={{ color, fontWeight: 700 }}>{label} · {score}/10</span>
       </div>
-      <div style={{ width: "100%", background: "#1f2937", borderRadius: "999px", height: "6px" }}>
+      <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "6px" }}>
         <div style={{ width: `${score * 10}%`, background: color, height: "6px", borderRadius: "999px", transition: "width 0.6s ease" }} />
       </div>
     </div>
@@ -26,6 +38,7 @@ export default function TopRatedPage() {
   const router = useRouter();
   const { dark, toggle: toggleDark } = useTheme();
   const [zip, setZip] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
   const [places, setPlaces] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -43,15 +56,18 @@ export default function TopRatedPage() {
     setHasSearched(false);
     setError("");
     try {
-      const res = await fetch(`/api/search?query=${encodeURIComponent("restaurants in " + zip)}`);
+      const category = activeCategory === "All" ? "restaurants" : activeCategory;
+      const res = await fetch(`/api/search?query=${encodeURIComponent(category + " in " + zip)}`);
       const data = await res.json();
       if (data.error) {
         setError("Something went wrong. Please try again.");
         setPlaces([]);
       } else {
-        // Sort by tipScore descending
-        const sorted = [...data.places].sort((a, b) => b.tipScore - a.tipScore);
-        setPlaces(sorted);
+        // Only keep 8+ scores, then sort descending
+        const filtered = data.places
+          .filter((p) => p.tipScore >= MIN_SCORE)
+          .sort((a, b) => b.tipScore - a.tipScore);
+        setPlaces(filtered);
       }
     } catch {
       setError("Could not connect. Check your connection and try again.");
@@ -60,7 +76,6 @@ export default function TopRatedPage() {
     setIsLoading(false);
     setHasSearched(true);
   }
-
 
   return (
     <>
@@ -74,6 +89,8 @@ export default function TopRatedPage() {
         .search-btn { background: #f59e0b; color: #030712; font-weight: 700; padding: 16px 32px; border-radius: 14px; border: none; cursor: pointer; font-size: 15px; font-family: 'DM Sans', sans-serif; transition: all 0.2s; white-space: nowrap; }
         .search-btn:hover:not(:disabled) { background: #fbbf24; transform: translateY(-1px); }
         .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .cat-btn { padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; border: 1px solid; }
+        .cat-btn:hover { transform: translateY(-1px); }
         .rank-row { border-radius: 20px; padding: 20px 24px; transition: all 0.25s; cursor: pointer; display: flex; align-items: center; gap: 20px; }
         .rank-row:hover { transform: translateX(4px); }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -116,37 +133,69 @@ export default function TopRatedPage() {
         {/* Hero */}
         <section style={{ maxWidth: "860px", margin: "0 auto", padding: "60px 32px 48px", textAlign: "center" }}>
           <div style={{ display: "inline-block", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "6px 16px", fontSize: "12px", fontWeight: 700, color: "#f59e0b", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "24px" }}>
-            Tip-Friendly Rankings
+            8/10 &amp; Above Only
           </div>
           <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, lineHeight: 1.05, letterSpacing: "-2px", marginBottom: "20px", color: text }}>
             The most <span style={{ color: "#f59e0b" }}>pressure-free</span><br />spots near you.
           </h1>
           <p style={{ color: muted, fontSize: "17px", maxWidth: "520px", margin: "0 auto 36px", lineHeight: 1.7 }}>
-            We rank local restaurants by their tipping culture score — so you can walk in relaxed, not anxious.
+            Only restaurants scoring <strong style={{ color: "#10b981" }}>8 or higher</strong> make this list — the cream of the crop for stress-free dining.
           </p>
 
-          {/* Search */}
-          <div style={{ display: "flex", gap: "12px", maxWidth: "520px", margin: "0 auto" }}>
-            <input
-              className="search-input"
-              type="text"
-              placeholder="Enter ZIP code or city..."
-              value={zip}
-              onChange={(e) => setZip(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              style={{ background: surface, border: `1px solid ${border}`, color: text }}
-            />
-            <button className="search-btn" onClick={handleSearch} disabled={isLoading}>
-              {isLoading ? "Searching..." : "Rank 'Em"}
-            </button>
+          {/* Step 1 — Category */}
+          <div style={{ marginBottom: "20px", textAlign: "left", maxWidth: "580px", margin: "0 auto 20px" }}>
+            <p style={{ fontSize: "12px", fontWeight: 700, color: muted, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
+              1 · Pick a category
+            </p>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {CATEGORIES.map((cat) => (
+                <button key={cat.label} className="cat-btn"
+                  onClick={() => setActiveCategory(cat.label)}
+                  style={{
+                    background: activeCategory === cat.label ? "#f59e0b" : surface,
+                    color: activeCategory === cat.label ? "#030712" : muted,
+                    borderColor: activeCategory === cat.label ? "#f59e0b" : border,
+                  }}
+                >
+                  {cat.icon} {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {hasSearched && !error && places.length > 0 && (
-            <p style={{ color: muted, fontSize: "13px", marginTop: "14px" }}>
-              Ranked <span style={{ color: "#f59e0b", fontWeight: 600 }}>{places.length} places</span> in &ldquo;{zip}&rdquo; by tip friendliness
+          {/* Step 2 — ZIP */}
+          <div style={{ maxWidth: "580px", margin: "0 auto", textAlign: "left" }}>
+            <p style={{ fontSize: "12px", fontWeight: 700, color: muted, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
+              2 · Enter your location
             </p>
-          )}
-          {error && <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "14px" }}>{error}</p>}
+            <div style={{ display: "flex", gap: "12px" }}>
+              <input
+                className="search-input"
+                type="text"
+                placeholder="ZIP code or city..."
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                style={{ background: surface, border: `1px solid ${border}`, color: text }}
+              />
+              <button className="search-btn" onClick={handleSearch} disabled={isLoading}>
+                {isLoading ? "Searching..." : "Rank \u2019Em"}
+              </button>
+            </div>
+
+            {hasSearched && !error && places.length > 0 && (
+              <p style={{ color: muted, fontSize: "13px", marginTop: "14px" }}>
+                Found <span style={{ color: "#10b981", fontWeight: 600 }}>{places.length} elite spot{places.length !== 1 ? "s" : ""}</span> scoring 8+ in &ldquo;{zip}&rdquo;
+                {activeCategory !== "All" && <span> · <span style={{ color: "#f59e0b" }}>{activeCategory}</span></span>}
+              </p>
+            )}
+            {hasSearched && !error && places.length === 0 && (
+              <p style={{ color: muted, fontSize: "13px", marginTop: "14px" }}>
+                No 8+ spots found. Try a different location or category.
+              </p>
+            )}
+            {error && <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "14px" }}>{error}</p>}
+          </div>
         </section>
 
         {/* Results */}
@@ -155,15 +204,7 @@ export default function TopRatedPage() {
           {isLoading && (
             <div style={{ textAlign: "center", padding: "80px 0" }}>
               <div className="spinner" />
-              <p style={{ color: muted, fontSize: "16px", fontWeight: 500 }}>Ranking places near you...</p>
-            </div>
-          )}
-
-          {!isLoading && hasSearched && places.length === 0 && !error && (
-            <div style={{ textAlign: "center", padding: "80px 0", color: muted }}>
-              <p style={{ fontSize: "48px", marginBottom: "16px" }}>🏆</p>
-              <p style={{ fontSize: "18px", fontWeight: 600, color: text }}>No results found.</p>
-              <p style={{ fontSize: "14px", marginTop: "8px" }}>Try a different ZIP or city name.</p>
+              <p style={{ color: muted, fontSize: "16px", fontWeight: 500 }}>Hunting for elite spots...</p>
             </div>
           )}
 
@@ -171,7 +212,7 @@ export default function TopRatedPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {places.map((place, i) => {
                 const isTop = i === 0;
-                const tipColor = place.tipScore >= 7 ? "#10b981" : place.tipScore >= 4 ? "#f59e0b" : "#ef4444";
+                const tipColor = "#10b981"; // all are 8+, always green
                 const glowStyle = isTop ? { boxShadow: "0 0 0 1px rgba(245,158,11,0.4), 0 12px 40px rgba(245,158,11,0.1)" } : {};
 
                 return (
@@ -188,7 +229,7 @@ export default function TopRatedPage() {
                     }}
                     onClick={() => router.push(`/restaurant/${place.id}`)}
                   >
-                    {/* Rank number */}
+                    {/* Rank */}
                     <div style={{ minWidth: "48px", textAlign: "center" }}>
                       {i < 3 ? (
                         <span style={{ fontSize: "28px" }}>{MEDAL[i]}</span>
@@ -218,7 +259,7 @@ export default function TopRatedPage() {
                         📍 {place.address} · 💬 {place.reviews.toLocaleString()} reviews
                       </p>
 
-                      <TipBar score={place.tipScore} />
+                      <TipBar score={place.tipScore} dark={dark} />
 
                       {place.tip && (
                         <p style={{ color: muted, fontSize: "12px", fontStyle: "italic", marginTop: "8px", lineHeight: 1.5 }}>
@@ -235,9 +276,9 @@ export default function TopRatedPage() {
           {/* Empty state before search */}
           {!hasSearched && !isLoading && (
             <div style={{ textAlign: "center", padding: "60px 0", color: muted }}>
-              <div style={{ fontSize: "72px", marginBottom: "20px", filter: "grayscale(0.3)" }}>🏆</div>
-              <p style={{ fontSize: "18px", fontWeight: 600, color: text, marginBottom: "8px" }}>Enter a location to see the rankings</p>
-              <p style={{ fontSize: "14px" }}>We&apos;ll sort every restaurant by how pressure-free their tipping experience is.</p>
+              <div style={{ fontSize: "72px", marginBottom: "20px" }}>🏆</div>
+              <p style={{ fontSize: "18px", fontWeight: 600, color: text, marginBottom: "8px" }}>Pick a category &amp; enter a location</p>
+              <p style={{ fontSize: "14px" }}>We&apos;ll surface only the places with an 8/10 or higher tip culture score.</p>
             </div>
           )}
         </section>
