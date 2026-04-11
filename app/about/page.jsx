@@ -40,7 +40,7 @@ export default function AboutPage() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
-              {[["Discover", "/"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["About", "/about"]].map(([item, path]) => (
+              {[["Discover", "/"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
                 <a key={item} href={path} style={{ color: item === "About" ? "#f59e0b" : muted, fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color 0.2s" }}>{item}</a>
               ))}
             </nav>
