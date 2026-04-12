@@ -5,7 +5,7 @@ import FloatingParticles from "../components/FloatingParticles";
 import { useTheme } from "../components/useTheme";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
-const MIN_SCORE = 8;
+const MIN_SCORE = 7;
 
 const CATEGORIES = [
   { label: "All", icon: "🍽️" },
@@ -133,13 +133,13 @@ export default function TopRatedPage() {
         {/* Hero */}
         <section style={{ maxWidth: "860px", margin: "0 auto", padding: "60px 32px 48px", textAlign: "center" }}>
           <div style={{ display: "inline-block", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "6px 16px", fontSize: "12px", fontWeight: 700, color: "#f59e0b", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "24px" }}>
-            8/10 &amp; Above Only
+            7/10 &amp; Above Only
           </div>
           <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, lineHeight: 1.05, letterSpacing: "-2px", marginBottom: "20px", color: text }}>
             The most <span style={{ color: "#f59e0b" }}>pressure-free</span><br />spots near you.
           </h1>
           <p style={{ color: muted, fontSize: "17px", maxWidth: "520px", margin: "0 auto 36px", lineHeight: 1.7 }}>
-            Only restaurants scoring <strong style={{ color: "#10b981" }}>8 or higher</strong> make this list — the cream of the crop for stress-free dining.
+            Only restaurants scoring <strong style={{ color: "#10b981" }}>7 or higher</strong> make this list — the best of the best for stress-free dining.
           </p>
 
           {/* Step 1 — Category */}
@@ -185,13 +185,13 @@ export default function TopRatedPage() {
 
             {hasSearched && !error && places.length > 0 && (
               <p style={{ color: muted, fontSize: "13px", marginTop: "14px" }}>
-                Found <span style={{ color: "#10b981", fontWeight: 600 }}>{places.length} elite spot{places.length !== 1 ? "s" : ""}</span> scoring 8+ in &ldquo;{zip}&rdquo;
+                Found <span style={{ color: "#10b981", fontWeight: 600 }}>{places.length} top spot{places.length !== 1 ? "s" : ""}</span> scoring 7+ in &ldquo;{zip}&rdquo;
                 {activeCategory !== "All" && <span> · <span style={{ color: "#f59e0b" }}>{activeCategory}</span></span>}
               </p>
             )}
             {hasSearched && !error && places.length === 0 && (
               <p style={{ color: muted, fontSize: "13px", marginTop: "14px" }}>
-                No 8+ spots found. Try a different location or category.
+                No 7+ spots found. Try a different location or category.
               </p>
             )}
             {error && <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "14px" }}>{error}</p>}
@@ -278,7 +278,7 @@ export default function TopRatedPage() {
             <div style={{ textAlign: "center", padding: "60px 0", color: muted }}>
               <div style={{ fontSize: "72px", marginBottom: "20px" }}>🏆</div>
               <p style={{ fontSize: "18px", fontWeight: 600, color: text, marginBottom: "8px" }}>Pick a category &amp; enter a location</p>
-              <p style={{ fontSize: "14px" }}>We&apos;ll surface only the places with an 8/10 or higher tip culture score.</p>
+              <p style={{ fontSize: "14px" }}>We&apos;ll surface only the places with a 7/10 or higher tip culture score.</p>
             </div>
           )}
         </section>

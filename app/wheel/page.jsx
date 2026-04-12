@@ -134,6 +134,13 @@ export default function WheelPage() {
   const [winner, setWinner] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // Winner search state
+  const [winnerZip, setWinnerZip] = useState("");
+  const [winnerPlaces, setWinnerPlaces] = useState([]);
+  const [winnerSearching, setWinnerSearching] = useState(false);
+  const [winnerSearched, setWinnerSearched] = useState(false);
+  const [winnerError, setWinnerError] = useState("");
+
   const validEntries = useMemo(
     () => entries.filter((e) => e.place.trim()),
     [entries]
@@ -200,12 +207,21 @@ export default function WheelPage() {
     };
   }, []);
 
+  function clearWinnerSearch() {
+    setWinnerZip("");
+    setWinnerPlaces([]);
+    setWinnerSearching(false);
+    setWinnerSearched(false);
+    setWinnerError("");
+  }
+
   function updateEntry(i, field, value) {
     setEntries((prev) =>
       prev.map((e, idx) => (idx === i ? { ...e, [field]: value } : e))
     );
     setWinner(null);
     setShowConfetti(false);
+    clearWinnerSearch();
   }
 
   function addEntry() {
@@ -220,6 +236,29 @@ export default function WheelPage() {
     setShowConfetti(false);
   }
 
+  async function handleWinnerSearch() {
+    if (!winnerZip.trim() || !winner) return;
+    setWinnerSearching(true);
+    setWinnerSearched(false);
+    setWinnerError("");
+    setWinnerPlaces([]);
+    try {
+      const query = `${winner.entry.place} in ${winnerZip}`;
+      const res = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      if (data.error) {
+        setWinnerError("Could not find places. Try a different ZIP.");
+      } else {
+        const sorted = [...data.places].sort((a, b) => b.tipScore - a.tipScore);
+        setWinnerPlaces(sorted);
+      }
+    } catch {
+      setWinnerError("Could not connect. Check your connection.");
+    }
+    setWinnerSearching(false);
+    setWinnerSearched(true);
+  }
+
   function resetAll() {
     setEntries([
       { place: "", player: "" },
@@ -227,6 +266,7 @@ export default function WheelPage() {
     ]);
     setWinner(null);
     setShowConfetti(false);
+    clearWinnerSearch();
     rotRef.current = 0;
     drawWheel(
       canvasRef.current,
@@ -307,6 +347,17 @@ export default function WheelPage() {
         @keyframes spin { to { transform: rotate(360deg); } }
         .add-btn { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; border: 1px dashed; }
         .add-btn:hover { transform: translateY(-1px); }
+        .wcard { border-radius: 16px; padding: 18px 20px; cursor: pointer; transition: all 0.25s; }
+        .wcard:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+        .fade-up { animation: fadeUp 0.35s ease forwards; opacity: 0; }
+        .zip-input { flex: 1; border-radius: 12px; padding: 14px 18px; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; transition: all 0.2s; border: 1px solid ${border}; background: ${dark ? "#111827" : "#f9fafb"}; color: ${text}; }
+        .zip-input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.18); }
+        .zip-input::placeholder { color: ${muted}; }
+        .zip-btn { background: linear-gradient(135deg,#6366f1,#4f46e5); color: #fff; font-weight: 700; padding: 14px 26px; border-radius: 12px; border: none; cursor: pointer; font-size: 15px; font-family: 'DM Sans', sans-serif; transition: all 0.2s; white-space: nowrap; }
+        .zip-btn:hover:not(:disabled) { background: linear-gradient(135deg,#818cf8,#6366f1); transform: translateY(-1px); }
+        .zip-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .w-spinner { width: 36px; height: 36px; border: 3px solid ${dark ? "#1f2937" : "#e5e7eb"}; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
       `}</style>
 
       {/* Confetti layer */}
@@ -525,9 +576,11 @@ export default function WheelPage() {
           </div>
         </section>
 
-        {/* Winner banner */}
+        {/* Winner banner + nearby search */}
         {winner && (
-          <section style={{ maxWidth: "680px", margin: "0 auto 80px", padding: "0 32px" }}>
+          <section style={{ maxWidth: "760px", margin: "0 auto 80px", padding: "0 32px", display: "flex", flexDirection: "column", gap: "28px" }}>
+
+            {/* Banner */}
             <div
               className="winner-banner winner-pulse"
               style={{
@@ -539,29 +592,132 @@ export default function WheelPage() {
               }}
             >
               <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎉</div>
-              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(22px,4vw,34px)", fontWeight: 800, color: "#10b981", letterSpacing: "-1px", marginBottom: "12px" }}>
+              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(22px,4vw,34px)", fontWeight: 800, color: "#10b981", letterSpacing: "-1px", marginBottom: "10px" }}>
                 {winner.entry.player
                   ? `${winner.entry.player}, your pick won!`
                   : "We have a winner!"}
               </div>
-              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(26px,4vw,42px)", fontWeight: 800, color: text, letterSpacing: "-1.5px", marginBottom: "16px" }}>
+              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(26px,4vw,46px)", fontWeight: 800, color: text, letterSpacing: "-1.5px", marginBottom: "14px" }}>
                 {winner.entry.place}
               </div>
-              <p style={{ color: muted, fontSize: "16px", lineHeight: 1.6 }}>
+              <p style={{ color: muted, fontSize: "16px", lineHeight: 1.6, marginBottom: "20px" }}>
                 {winner.entry.player
-                  ? `Congrats \uD83C\uDF1F The wheel has spoken. ${winner.entry.player} gets to pick — and it\u2019s ${winner.entry.place}!`
+                  ? `Congrats \uD83C\uDF1F The wheel has spoken \u2014 ${winner.entry.player} gets to pick, and it\u2019s ${winner.entry.place}!`
                   : `The wheel has spoken \u2014 time to head to ${winner.entry.place}!`}
               </p>
-              <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "20px", flexWrap: "wrap" }}>
-                {["🚗 Let&apos;s go!", "😋 Great choice!", "🍽️ Let&apos;s eat!"].map((tag) => (
-                  <span
-                    key={tag}
-                    style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: "999px", padding: "6px 16px", fontSize: "14px", fontWeight: 600, color: "#10b981" }}
-                    dangerouslySetInnerHTML={{ __html: tag }}
-                  />
+              <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
+                {["\uD83D\uDE97 Let\u2019s go!", "\uD83D\uDE0B Great choice!", "\uD83C\uDF7D\uFE0F Let\u2019s eat!"].map((tag) => (
+                  <span key={tag} style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: "999px", padding: "6px 16px", fontSize: "14px", fontWeight: 600, color: "#10b981" }}>
+                    {tag}
+                  </span>
                 ))}
               </div>
             </div>
+
+            {/* Nearby search box */}
+            <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: "20px", padding: "28px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <div style={{ width: "36px", height: "36px", background: "linear-gradient(135deg,#6366f1,#4f46e5)", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>📍</div>
+                <div>
+                  <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: "17px", fontWeight: 800, color: text, letterSpacing: "-0.4px" }}>
+                    Find {winner.entry.place} near you
+                  </h3>
+                  <p style={{ color: muted, fontSize: "13px" }}>
+                    Enter your ZIP and we&apos;ll show top-rated {winner.entry.place} spots sorted by tip friendliness.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+                <input
+                  className="zip-input"
+                  type="text"
+                  placeholder="ZIP code or city…"
+                  value={winnerZip}
+                  onChange={(e) => setWinnerZip(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleWinnerSearch()}
+                />
+                <button className="zip-btn" onClick={handleWinnerSearch} disabled={winnerSearching || !winnerZip.trim()}>
+                  {winnerSearching ? "Searching\u2026" : "Find Spots"}
+                </button>
+              </div>
+
+              {winnerError && (
+                <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "12px" }}>{winnerError}</p>
+              )}
+
+              {/* Results */}
+              {winnerSearching && (
+                <div style={{ textAlign: "center", padding: "36px 0" }}>
+                  <div className="w-spinner" />
+                  <p style={{ color: muted, fontSize: "14px" }}>Finding the best {winner.entry.place} near you&hellip;</p>
+                </div>
+              )}
+
+              {!winnerSearching && winnerSearched && winnerPlaces.length === 0 && !winnerError && (
+                <div style={{ textAlign: "center", padding: "32px 0", color: muted }}>
+                  <p style={{ fontSize: "36px", marginBottom: "10px" }}>🍽️</p>
+                  <p style={{ fontWeight: 600, color: text }}>No results found</p>
+                  <p style={{ fontSize: "13px", marginTop: "6px" }}>Try a different ZIP or city name.</p>
+                </div>
+              )}
+
+              {!winnerSearching && winnerPlaces.length > 0 && (
+                <div style={{ marginTop: "20px" }}>
+                  <p style={{ fontSize: "12px", color: muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "14px" }}>
+                    {winnerPlaces.length} spot{winnerPlaces.length !== 1 ? "s" : ""} found &mdash; sorted by tip friendliness
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {winnerPlaces.map((place, i) => {
+                      const tipColor = place.tipScore >= 7 ? "#10b981" : place.tipScore >= 4 ? "#f59e0b" : "#ef4444";
+                      const tipLabel = place.tipScore >= 7 ? "Friendly" : place.tipScore >= 4 ? "Moderate" : "Pressured";
+                      return (
+                        <div
+                          key={place.id}
+                          className="wcard fade-up"
+                          style={{
+                            background: dark ? "#111827" : "#f9fafb",
+                            border: `1px solid ${i === 0 ? "rgba(16,185,129,0.4)" : border}`,
+                            animationDelay: `${i * 0.07}s`,
+                          }}
+                          onClick={() => router.push(`/restaurant/${place.id}`)}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                                {i === 0 && <span style={{ fontSize: "16px" }}>🏆</span>}
+                                <h4 style={{ fontFamily: "'Syne', sans-serif", fontSize: "15px", fontWeight: 700, color: text, letterSpacing: "-0.3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  {place.name}
+                                </h4>
+                              </div>
+                              <p style={{ color: muted, fontSize: "12px" }}>📍 {place.address}</p>
+                              {place.tip && (
+                                <p style={{ color: muted, fontSize: "12px", fontStyle: "italic", marginTop: "6px", lineHeight: 1.5 }}>
+                                  &ldquo;{place.tip}&rdquo;
+                                </p>
+                              )}
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px", flexShrink: 0 }}>
+                              <span style={{ fontSize: "18px", fontWeight: 800, color: tipColor, fontFamily: "'Syne', sans-serif" }}>
+                                {place.tipScore}/10
+                              </span>
+                              <span style={{ fontSize: "11px", fontWeight: 700, color: tipColor, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                                {tipLabel}
+                              </span>
+                              <span style={{ display: "flex", alignItems: "center", gap: "3px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: "6px", padding: "2px 8px", fontSize: "12px" }}>
+                                <span>⭐</span>
+                                <span style={{ color: "#f59e0b", fontWeight: 700 }}>{place.rating}</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
           </section>
         )}
 
