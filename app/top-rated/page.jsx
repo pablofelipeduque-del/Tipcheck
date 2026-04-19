@@ -97,8 +97,8 @@ export default function TopRatedPage() {
         .spinner { width: 44px; height: 44px; border: 3px solid #1f2937; border-top-color: #f59e0b; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         .fade-up { animation: fadeUp 0.4s ease forwards; opacity: 0; }
-        .nav-link { color: #6b7280; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
-        .nav-link:hover { color: ${text}; }
+        .nav-link { font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; padding: 6px 14px; border-radius: 999px; }
+        .nav-link:hover { background: ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}; color: #f59e0b !important; }
       `}</style>
 
       <FloatingParticles count={20} />
@@ -107,13 +107,13 @@ export default function TopRatedPage() {
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100, transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/")}>
-            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "96px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
+            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
               {[["Discover", "/"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
                 <a key={item} href={path} className="nav-link"
-                  style={{ color: item === "Top Rated" ? "#f59e0b" : muted }}
+                  style={{ color: item === "Top Rated" ? "#f59e0b" : dark ? "#e5e7eb" : "#1f2937", background: item === "Top Rated" ? (dark ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.1)") : "transparent" }}
                 >{item}</a>
               ))}
             </nav>
@@ -283,7 +283,7 @@ export default function TopRatedPage() {
         {/* Footer */}
         <footer style={{ borderTop: `1px solid ${border}`, padding: "40px 32px", textAlign: "center", background: dark ? "#0d1117" : "#ffffff", transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "32px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
+            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "32px", width: "auto" }} />
           </div>
           <p style={{ color: muted, fontSize: "13px" }}>Empowering diners with transparent tipping culture data.</p>
           <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipCheck. All rights reserved.</p>

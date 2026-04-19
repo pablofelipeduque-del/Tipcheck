@@ -176,15 +176,15 @@ export default function Home() {
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100, transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "96px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
+            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
              {[["Discover", "/"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
-  <a key={item} href={path} style={{ color: muted, fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color 0.2s" }}
-onMouseEnter={(e) => (e.currentTarget as HTMLAnchorElement).style.color = text}
-onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
-    
+  <a key={item} href={path}
+    style={{ color: dark ? "#e5e7eb" : "#1f2937", fontSize: "14px", fontWeight: 600, textDecoration: "none", transition: "all 0.2s", padding: "6px 14px", borderRadius: "999px", background: "transparent" }}
+    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"; (e.currentTarget as HTMLAnchorElement).style.color = "#f59e0b"; }}
+    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; (e.currentTarget as HTMLAnchorElement).style.color = dark ? "#e5e7eb" : "#1f2937"; }}
   >{item}</a>
 ))}
             </nav>
@@ -214,8 +214,8 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
             </p>
 
             {/* Step 1 – Category */}
-            <div style={{ marginBottom: "16px" }}>
-              <p style={{ fontSize: "12px", fontWeight: 700, color: muted, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
+            <div style={{ marginBottom: "16px", background: dark ? "rgba(255,255,255,0.05)" : "#ffffff", border: `1px solid ${border}`, borderRadius: "16px", padding: "18px 20px" }}>
+              <p style={{ fontSize: "12px", fontWeight: 700, color: dark ? "#e5e7eb" : "#374151", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>
                 1 · Pick a category
               </p>
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
@@ -223,8 +223,8 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
                   <button key={cat.label} className="cat-btn"
                     onClick={() => setActiveCategory(cat.label)}
                     style={{
-                      background: activeCategory === cat.label ? "#f59e0b" : surface,
-                      color: activeCategory === cat.label ? "#030712" : muted,
+                      background: activeCategory === cat.label ? "#f59e0b" : dark ? "rgba(255,255,255,0.07)" : "#f3f4f6",
+                      color: activeCategory === cat.label ? "#030712" : dark ? "#e5e7eb" : "#374151",
                       borderColor: activeCategory === cat.label ? "#f59e0b" : border,
                     }}
                   >
@@ -235,8 +235,8 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
             </div>
 
             {/* Step 2 – ZIP */}
-            <div style={{ marginBottom: "24px" }}>
-              <p style={{ fontSize: "12px", fontWeight: 700, color: muted, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
+            <div style={{ marginBottom: "24px", background: dark ? "rgba(255,255,255,0.05)" : "#ffffff", border: `1px solid ${border}`, borderRadius: "16px", padding: "18px 20px" }}>
+              <p style={{ fontSize: "12px", fontWeight: 700, color: dark ? "#e5e7eb" : "#374151", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>
                 2 · Enter your location
               </p>
               <div style={{ display: "flex", gap: "12px", maxWidth: "520px" }}>
@@ -247,7 +247,7 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
                   value={zip}
                   onChange={(e) => setZip(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  style={{ background: surface, border: `1px solid ${border}`, color: text }}
+                  style={{ background: dark ? "rgba(255,255,255,0.07)" : "#f3f4f6", border: `1px solid ${border}`, color: dark ? "#ffffff" : "#111827" }}
                 />
                 <button className="search-btn" onClick={handleSearch} disabled={isLoading}>
                   {isLoading ? "Searching..." : "Search"}

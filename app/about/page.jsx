@@ -33,12 +33,16 @@ export default function AboutPage() {
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100 }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/")}>
-            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "96px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
+            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
               {[["Discover", "/"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
-                <a key={item} href={path} style={{ color: item === "About" ? "#f59e0b" : muted, fontSize: "14px", fontWeight: 500, textDecoration: "none", transition: "color 0.2s" }}>{item}</a>
+                <a key={item} href={path}
+                  style={{ color: item === "About" ? "#f59e0b" : dark ? "#e5e7eb" : "#1f2937", fontSize: "14px", fontWeight: 600, textDecoration: "none", transition: "all 0.2s", padding: "6px 14px", borderRadius: "999px", background: item === "About" ? (dark ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.1)") : "transparent" }}
+                  onMouseEnter={e => { if (item !== "About") { e.currentTarget.style.background = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"; e.currentTarget.style.color = "#f59e0b"; }}}
+                  onMouseLeave={e => { if (item !== "About") { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = dark ? "#e5e7eb" : "#1f2937"; }}}
+                >{item}</a>
               ))}
             </nav>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -130,7 +134,7 @@ export default function AboutPage() {
         {/* Footer */}
         <footer style={{ borderTop: `1px solid ${border}`, padding: "40px 32px", textAlign: "center", background: dark ? "#0d1117" : "#ffffff" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "32px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
+            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "32px", width: "auto" }} />
           </div>
           <p style={{ color: muted, fontSize: "13px" }}>Empowering diners with transparent tipping culture data.</p>
           <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipCheck. All rights reserved.</p>

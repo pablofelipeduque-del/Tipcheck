@@ -306,8 +306,8 @@ export default function RoulettePage() {
         .toggle-knob { width: 22px; height: 22px; border-radius: 50%; background: white; position: absolute; top: 3px; transition: left 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .cat-btn { padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; border: 1px solid; white-space: nowrap; }
         .search-input { border-radius: 12px; padding: 12px 18px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: all 0.2s; width: 100%; }
-        .nav-link { color: #6b7280; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; }
-        .nav-link:hover { color: ${text}; }
+        .nav-link { font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; padding: 6px 14px; border-radius: 999px; }
+        .nav-link:hover { background: ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}; color: #f59e0b !important; }
         .spin-btn { width: 100%; padding: 18px; font-weight: 900; font-size: 18px; font-family: 'Syne', sans-serif; border-radius: 14px; cursor: pointer; letter-spacing: 0.04em; transition: all 0.1s; }
         .spin-btn:active:not(:disabled) { transform: translateY(3px) !important; box-shadow: none !important; }
         @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
@@ -324,12 +324,12 @@ export default function RoulettePage() {
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100 }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/")}>
-            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "96px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
+            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
               {[["Discover", "/"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
-                <a key={item} href={path} className="nav-link" style={{ color: item === "Dining Roulette" ? "#f59e0b" : muted }}>{item}</a>
+                <a key={item} href={path} className="nav-link" style={{ color: item === "Dining Roulette" ? "#f59e0b" : dark ? "#e5e7eb" : "#1f2937", background: item === "Dining Roulette" ? (dark ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.1)") : "transparent" }}>{item}</a>
               ))}
             </nav>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -493,7 +493,7 @@ export default function RoulettePage() {
         {/* Footer */}
         <footer style={{ borderTop: `1px solid ${border}`, padding: "40px 32px", textAlign: "center", background: dark ? "#0d1117" : "#ffffff" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "32px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
+            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "32px", width: "auto" }} />
           </div>
           <p style={{ color: muted, fontSize: "13px" }}>Empowering diners with transparent tipping culture data.</p>
           <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipCheck. All rights reserved.</p>
