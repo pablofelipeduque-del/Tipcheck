@@ -6,10 +6,10 @@ import FloatingParticles from "../../components/FloatingParticles";
 import { useTheme } from "../../components/useTheme";
 
 function ScoreBar({ score }) {
-  const color = score >= 7 ? "#10b981" : score >= 4 ? "#f59e0b" : "#ef4444";
+  const color = score >= 4 ? "#10b981" : score >= 3 ? "#f59e0b" : "#ef4444";
   return (
     <div style={{ width: "100%", background: "#1f2937", borderRadius: "999px", height: "6px" }}>
-      <div style={{ width: `${score * 10}%`, background: color, height: "6px", borderRadius: "999px", transition: "width 0.6s ease" }} />
+      <div style={{ width: `${score * 20}%`, background: color, height: "6px", borderRadius: "999px", transition: "width 0.6s ease" }} />
     </div>
   );
 }
@@ -38,7 +38,7 @@ export default function RestaurantPage() {
     pressured: null,
     tip_added: null,
     counter_order: null,
-    score: 5,
+    score: 3,
     comment: ""
   });
 
@@ -93,8 +93,8 @@ export default function RestaurantPage() {
     setSubmitting(false);
   }
 
-  const tipColor = place ? (place.tipScore >= 7 ? "#10b981" : place.tipScore >= 4 ? "#f59e0b" : "#ef4444") : "#f59e0b";
-  const tipLabel = place ? (place.tipScore >= 7 ? "Friendly" : place.tipScore >= 4 ? "Moderate" : "Pressured") : "Unknown";
+  const tipColor = place ? (place.tipScore >= 4 ? "#10b981" : place.tipScore >= 3 ? "#f59e0b" : "#ef4444") : "#f59e0b";
+  const tipLabel = place ? (place.tipScore >= 4 ? "Friendly" : place.tipScore >= 3 ? "Moderate" : "Pressured") : "Unknown";
 
   // Community stats
   const reportCount = reports.length;
@@ -157,7 +157,7 @@ export default function RestaurantPage() {
               <div style={{ background: "#0d1117", border: "1px solid #1f2937", borderRadius: "20px", padding: "24px", marginBottom: "20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
                   <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 700 }}>Tipping Culture Score</h2>
-                  <span style={{ fontSize: "20px", fontWeight: 800, color: tipColor }}>{place.tipScore}/10 · {tipLabel}</span>
+                  <span style={{ fontSize: "20px", fontWeight: 800, color: tipColor }}>{place.tipScore}/5 · {tipLabel}</span>
                 </div>
                 <ScoreBar score={place.tipScore} />
                 <p style={{ color: "#6b7280", fontSize: "13px", fontStyle: "italic", marginTop: "12px" }}>&ldquo;{place.tip}&rdquo;</p>
@@ -180,7 +180,7 @@ export default function RestaurantPage() {
                       icon="🏅"
                       label="Avg community score"
                       value={`${avgScore}/10`}
-                      highlight={avgScore >= 7 ? "#10b981" : avgScore >= 4 ? "#f59e0b" : "#ef4444"}
+                      highlight={avgScore >= 4 ? "#10b981" : avgScore >= 3 ? "#f59e0b" : "#ef4444"}
                     />
                     <StatPill
                       icon="😤"
@@ -200,7 +200,7 @@ export default function RestaurantPage() {
                   <div style={{ marginBottom: comments.length > 0 ? "24px" : "0" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#6b7280", marginBottom: "6px" }}>
                       <span style={{ textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Community tip score</span>
-                      <span style={{ color: avgScore >= 7 ? "#10b981" : avgScore >= 4 ? "#f59e0b" : "#ef4444", fontWeight: 700 }}>{avgScore}/10</span>
+                      <span style={{ color: avgScore >= 4 ? "#10b981" : avgScore >= 3 ? "#f59e0b" : "#ef4444", fontWeight: 700 }}>{avgScore}/5</span>
                     </div>
                     <ScoreBar score={avgScore} />
                   </div>
@@ -226,7 +226,7 @@ export default function RestaurantPage() {
                                   <span style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: "999px", padding: "2px 10px", fontSize: "11px", color: "#818cf8", fontWeight: 600 }}>Counter order</span>
                                 )}
                               </div>
-                              <span style={{ fontSize: "12px", fontWeight: 700, color: r.score >= 7 ? "#10b981" : r.score >= 4 ? "#f59e0b" : "#ef4444" }}>{r.score}/10</span>
+                              <span style={{ fontSize: "12px", fontWeight: 700, color: r.score >= 4 ? "#10b981" : r.score >= 3 ? "#f59e0b" : "#ef4444" }}>{r.score}/5</span>
                             </div>
                             <p style={{ color: "#9ca3af", fontSize: "14px", lineHeight: 1.6 }}>&ldquo;{r.comment}&rdquo;</p>
                           </div>
@@ -274,11 +274,11 @@ export default function RestaurantPage() {
                         </div>
                       </div>
                       <div style={{ marginBottom: "20px" }}>
-                        <p style={{ fontWeight: 600, marginBottom: "10px" }}>Rate the tipping experience: <span style={{ color: "#f59e0b" }}>{form.score}/10</span></p>
-                        <input type="range" min="1" max="10" value={form.score} onChange={(e) => setForm({ ...form, score: parseInt(e.target.value) })} style={{ width: "100%", accentColor: "#f59e0b" }} />
+                        <p style={{ fontWeight: 600, marginBottom: "10px" }}>Rate the tipping experience: <span style={{ color: "#f59e0b" }}>{form.score}/5</span></p>
+                        <input type="range" min="1" max="5" value={form.score} onChange={(e) => setForm({ ...form, score: parseInt(e.target.value) })} style={{ width: "100%", accentColor: "#f59e0b" }} />
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
                           <span>1 - Very Pressured</span>
-                          <span>10 - No Pressure</span>
+                          <span>5 - No Pressure</span>
                         </div>
                       </div>
                       <div style={{ marginBottom: "24px" }}>

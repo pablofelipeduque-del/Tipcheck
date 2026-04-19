@@ -669,8 +669,8 @@ export default function WheelPage() {
                   </p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     {winnerPlaces.map((place, i) => {
-                      const tipColor = place.tipScore >= 7 ? "#10b981" : place.tipScore >= 4 ? "#f59e0b" : "#ef4444";
-                      const tipLabel = place.tipScore >= 7 ? "Friendly" : place.tipScore >= 4 ? "Moderate" : "Pressured";
+                      const tipColor = place.tipScore >= 4 ? "#10b981" : place.tipScore >= 3 ? "#f59e0b" : "#ef4444";
+                      const tipLabel = place.tipScore >= 4 ? "Friendly" : place.tipScore >= 3 ? "Moderate" : "Pressured";
                       return (
                         <div
                           key={place.id}
@@ -699,7 +699,7 @@ export default function WheelPage() {
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px", flexShrink: 0 }}>
                               <span style={{ fontSize: "18px", fontWeight: 800, color: tipColor, fontFamily: "'Syne', sans-serif" }}>
-                                {place.tipScore}/10
+                                {place.tipScore}/5
                               </span>
                               <span style={{ fontSize: "11px", fontWeight: 700, color: tipColor, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                                 {tipLabel}

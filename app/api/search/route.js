@@ -15,7 +15,7 @@ export async function GET(request) {
 
     const places = await Promise.all(
       searchData.results.slice(0, 10).map(async (place) => {
-        let tipScore = 6;
+        let tipScore = 3;
         let tipSummary = "No tipping data available yet.";
 
         try {
@@ -30,7 +30,7 @@ export async function GET(request) {
           const badWords = ["pressure", "forced", "mandatory", "guilt", "awkward", "aggressive", "required", "tip screen", "flipped", "expected to tip", "made to tip", "tip jar shoved"];
           const goodWords = ["no pressure", "optional", "fair tip", "no tip", "relaxed", "no obligation", "tip was optional", "not pressured", "tipping optional"];
 
-          let score = 6;
+          let score = 3;
           let badCount = 0;
           let goodCount = 0;
 
@@ -45,22 +45,22 @@ export async function GET(request) {
           });
 
           if (badCount === 0 && goodCount === 0) {
-            score = 6;
+            score = 3;
             tipSummary = "No specific tipping mentions found in reviews.";
           } else if (badCount > goodCount) {
-            score = Math.max(1, 5 - badCount);
+            score = Math.max(1, 3 - badCount);
             tipSummary = `${badCount} review(s) mention tipping pressure or discomfort.`;
           } else if (goodCount > badCount) {
-            score = Math.min(10, 6 + goodCount);
+            score = Math.min(5, 3 + goodCount);
             tipSummary = `${goodCount} review(s) praise the relaxed tipping experience.`;
           } else {
-            score = 5;
+            score = 3;
             tipSummary = "Mixed tipping experiences reported.";
           }
 
           tipScore = score;
         } catch (e) {
-          tipScore = 6;
+          tipScore = 3;
         }
 
         return {
@@ -76,7 +76,7 @@ export async function GET(request) {
       })
     );
 
-    return Response.json({ places });
+    return Response.json({ places: places.filter((p) => p.name && p.name.trim()) });
   } catch (error) {
     return Response.json({ error: "Failed to fetch places" }, { status: 500 });
   }

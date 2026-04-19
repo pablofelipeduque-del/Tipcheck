@@ -26,10 +26,10 @@ export async function GET(request) {
     badWords.forEach((w) => { badCount += (allText.match(new RegExp(w, "g")) || []).length; });
     goodWords.forEach((w) => { goodCount += (allText.match(new RegExp(w, "g")) || []).length; });
 
-    let tipScore = 6;
+    let tipScore = 3;
     let tip = "No specific tipping mentions found in reviews.";
-    if (badCount > goodCount) { tipScore = Math.max(1, 5 - badCount); tip = `${badCount} review(s) mention tipping pressure.`; }
-    else if (goodCount > badCount) { tipScore = Math.min(10, 6 + goodCount); tip = `${goodCount} review(s) praise the relaxed tipping experience.`; }
+    if (badCount > goodCount) { tipScore = Math.max(1, 3 - badCount); tip = `${badCount} review(s) mention tipping pressure.`; }
+    else if (goodCount > badCount) { tipScore = Math.min(5, 3 + goodCount); tip = `${goodCount} review(s) praise the relaxed tipping experience.`; }
 
     return Response.json({
       place: {

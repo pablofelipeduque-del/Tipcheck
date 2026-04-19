@@ -5,7 +5,7 @@ import FloatingParticles from "../components/FloatingParticles";
 import { useTheme } from "../components/useTheme";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
-const MIN_SCORE = 7;
+const MIN_SCORE = 4;
 
 const CATEGORIES = [
   { label: "All", icon: "🍽️" },
@@ -19,16 +19,16 @@ const CATEGORIES = [
 ];
 
 function TipBar({ score, dark }) {
-  const color = score >= 8 ? "#10b981" : score >= 6 ? "#f59e0b" : "#ef4444";
-  const label = score >= 8 ? "Excellent" : score >= 6 ? "Friendly" : "Moderate";
+  const color = score >= 4 ? "#10b981" : score >= 3 ? "#f59e0b" : "#ef4444";
+  const label = score >= 4 ? "Excellent" : score >= 3 ? "Friendly" : "Moderate";
   return (
     <div style={{ flex: 1 }}>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "5px" }}>
         <span style={{ color: dark ? "#6b7280" : "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Tip Culture</span>
-        <span style={{ color, fontWeight: 700 }}>{label} · {score}/10</span>
+        <span style={{ color, fontWeight: 700 }}>{label} · {score}/5</span>
       </div>
       <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "6px" }}>
-        <div style={{ width: `${score * 10}%`, background: color, height: "6px", borderRadius: "999px", transition: "width 0.6s ease" }} />
+        <div style={{ width: `${score * 20}%`, background: color, height: "6px", borderRadius: "999px", transition: "width 0.6s ease" }} />
       </div>
     </div>
   );
@@ -133,13 +133,13 @@ export default function TopRatedPage() {
         {/* Hero */}
         <section style={{ maxWidth: "860px", margin: "0 auto", padding: "60px 32px 48px", textAlign: "center" }}>
           <div style={{ display: "inline-block", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "6px 16px", fontSize: "12px", fontWeight: 700, color: "#f59e0b", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "24px" }}>
-            7/10 &amp; Above Only
+            4/5 &amp; Above Only
           </div>
           <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(36px, 5vw, 60px)", fontWeight: 800, lineHeight: 1.05, letterSpacing: "-2px", marginBottom: "20px", color: text }}>
             The most <span style={{ color: "#f59e0b" }}>pressure-free</span><br />spots near you.
           </h1>
           <p style={{ color: muted, fontSize: "17px", maxWidth: "520px", margin: "0 auto 36px", lineHeight: 1.7 }}>
-            Only restaurants scoring <strong style={{ color: "#10b981" }}>7 or higher</strong> make this list — the best of the best for stress-free dining.
+            Only restaurants scoring <strong style={{ color: "#10b981" }}>4 or higher</strong> make this list — the best of the best for stress-free dining.
           </p>
 
           {/* Step 1 — Category */}
@@ -185,13 +185,13 @@ export default function TopRatedPage() {
 
             {hasSearched && !error && places.length > 0 && (
               <p style={{ color: muted, fontSize: "13px", marginTop: "14px" }}>
-                Found <span style={{ color: "#10b981", fontWeight: 600 }}>{places.length} top spot{places.length !== 1 ? "s" : ""}</span> scoring 7+ in &ldquo;{zip}&rdquo;
+                Found <span style={{ color: "#10b981", fontWeight: 600 }}>{places.length} top spot{places.length !== 1 ? "s" : ""}</span> scoring 4+ in &ldquo;{zip}&rdquo;
                 {activeCategory !== "All" && <span> · <span style={{ color: "#f59e0b" }}>{activeCategory}</span></span>}
               </p>
             )}
             {hasSearched && !error && places.length === 0 && (
               <p style={{ color: muted, fontSize: "13px", marginTop: "14px" }}>
-                No 7+ spots found. Try a different location or category.
+                No 4+ spots found. Try a different location or category.
               </p>
             )}
             {error && <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "14px" }}>{error}</p>}
@@ -250,7 +250,7 @@ export default function TopRatedPage() {
                             <span style={{ color: "#f59e0b", fontWeight: 700 }}>{place.rating}</span>
                           </span>
                           <span style={{ fontSize: "22px", fontWeight: 800, color: tipColor, fontFamily: "'Syne', sans-serif" }}>
-                            {place.tipScore}/10
+                            {place.tipScore}/5
                           </span>
                         </div>
                       </div>
@@ -278,7 +278,7 @@ export default function TopRatedPage() {
             <div style={{ textAlign: "center", padding: "60px 0", color: muted }}>
               <div style={{ fontSize: "72px", marginBottom: "20px" }}>🏆</div>
               <p style={{ fontSize: "18px", fontWeight: 600, color: text, marginBottom: "8px" }}>Pick a category &amp; enter a location</p>
-              <p style={{ fontSize: "14px" }}>We&apos;ll surface only the places with a 7/10 or higher tip culture score.</p>
+              <p style={{ fontSize: "14px" }}>We&apos;ll surface only the places with a 4/5 or higher tip culture score.</p>
             </div>
           )}
         </section>

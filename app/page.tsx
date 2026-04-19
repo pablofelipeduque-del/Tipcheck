@@ -15,17 +15,43 @@ const categories = [
   { label: "Desserts", icon: "🍰" },
 ];
 
-function TipMeter({ score, dark }) {
-  const color = score >= 7 ? "#10b981" : score >= 4 ? "#f59e0b" : "#ef4444";
-  const label = score >= 7 ? "Friendly" : score >= 4 ? "Moderate" : "Pressured";
+function TipMeter({ score, dark, isTop }: { score: number; dark: boolean; isTop?: boolean }) {
+  const color = score >= 4 ? "#10b981" : score >= 3 ? "#f59e0b" : "#ef4444";
+  const label = score >= 4 ? "Friendly" : score >= 3 ? "Moderate" : "Pressured";
   return (
     <div style={{ marginTop: "14px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "6px", fontFamily: "'DM Sans', sans-serif" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", marginBottom: "6px", fontFamily: "'DM Sans', sans-serif" }}>
         <span style={{ color: dark ? "#6b7280" : "#9ca3af", letterSpacing: "0.05em", textTransform: "uppercase", fontWeight: 600 }}>Tip Culture</span>
-        <span style={{ color, fontWeight: 700 }}>{label} · {score}/10</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          {score >= 4 && (
+            <span style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              background: isTop
+                ? "linear-gradient(135deg, #f59e0b, #d97706)"
+                : "rgba(16,185,129,0.15)",
+              border: isTop ? "none" : "1px solid rgba(16,185,129,0.35)",
+              color: isTop ? "#030712" : "#10b981",
+              fontSize: "10px",
+              fontWeight: 800,
+              padding: "2px 8px 2px 6px",
+              borderRadius: "999px",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase" as const,
+            }}>
+              <svg width="10" height="13" viewBox="0 0 10 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0H10V10L8.5 8.5L7 10L5.5 8.5L4.5 10L3 8.5L1.5 10L0 8.5V0Z" fill="currentColor" opacity="0.9"/>
+                <path d="M2.5 4.5L4 6L7.5 2.5" stroke={isTop ? "#030712" : "#ffffff"} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {isTop ? "Top Pick" : "Tip Friendly"}
+            </span>
+          )}
+          <span style={{ color, fontWeight: 700 }}>{label} · {score}/5</span>
+        </div>
       </div>
       <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "6px" }}>
-        <div style={{ width: `${score * 10}%`, background: color, height: "6px", borderRadius: "999px", transition: "width 0.6s ease" }} />
+        <div style={{ width: `${score * 20}%`, background: color, height: "6px", borderRadius: "999px", transition: "width 0.6s ease" }} />
       </div>
     </div>
   );
@@ -101,7 +127,19 @@ export default function Home() {
       const res = await fetch(`/api/search?query=${encodeURIComponent(category + " in " + zip)}`);
       const data = await res.json();
       if (data.error) { setError("Something went wrong."); setPlaces([]); }
-      else { setPlaces(data.places); }
+      else {
+        const seen = new Set();
+        const sorted = data.places
+          .filter((p: any) => {
+            if (!p.name || !p.name.trim()) return false;
+            const key = p.name.toLowerCase().trim();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          })
+          .sort((a: any, b: any) => b.tipScore - a.tipScore || b.rating - a.rating);
+        setPlaces(sorted);
+      }
     } catch { setError("Could not connect."); setPlaces([]); }
     setIsLoading(false);
     setHasSearched(true);
@@ -128,6 +166,8 @@ export default function Home() {
         .card-animate { animation: fadeUp 0.4s ease forwards; opacity: 0; }
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .float { animation: float 4s ease-in-out infinite; }
+        @keyframes goldPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5), 0 8px 32px rgba(245,158,11,0.15); } 50% { box-shadow: 0 0 0 6px rgba(245,158,11,0), 0 8px 40px rgba(245,158,11,0.35); } }
+        .top-card { animation: fadeUp 0.4s ease forwards, goldPulse 2.5s 0.4s ease-in-out infinite !important; border-color: #f59e0b !important; }
       `}</style>
 
       <FloatingParticles count={22} />
@@ -258,29 +298,97 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
               <p style={{ fontSize: "14px", marginTop: "8px" }}>Try a different ZIP code or category.</p>
             </div>
           )}
-          {!isLoading && places.length > 0 && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
-              {places.map((place, i) => (
-                <div key={place.id} className="card card-animate"
-                  style={{ background: surface, border: `1px solid ${border}`, borderRadius: "20px", padding: "22px", animationDelay: `${i * 0.07}s` }}
-                  onClick={() => router.push(`/restaurant/${place.id}`)}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" }}>
-                    <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: "17px", fontWeight: 700, letterSpacing: "-0.3px", flex: 1, paddingRight: "12px", color: text }}>{place.name}</h3>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: "8px", padding: "4px 10px" }}>
-                      <span style={{ fontSize: "12px" }}>⭐</span>
-                      <span style={{ color: "#f59e0b", fontWeight: 700, fontSize: "14px" }}>{place.rating}</span>
+          {!isLoading && places.length > 0 && (() => {
+            const maxScore = Math.max(...places.map((p) => p.tipScore));
+            return (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
+                {places.map((place, i) => {
+                  // Always highlight top 1-2 after sort, as long as they're not the worst score
+                  const isTop = i < 2 && place.tipScore === maxScore && maxScore > 1;
+                  return (
+                    <div key={place.id} className={`card card-animate${isTop ? " top-card" : ""}`}
+                      style={{
+                        background: isTop
+                          ? dark
+                            ? "linear-gradient(145deg, rgba(245,158,11,0.18) 0%, #0d1117 60%)"
+                            : "linear-gradient(145deg, rgba(245,158,11,0.14) 0%, #ffffff 60%)"
+                          : surface,
+                        border: `${isTop ? "2px" : "1px"} solid ${isTop ? "#f59e0b" : border}`,
+                        borderRadius: "20px",
+                        padding: isTop ? "21px" : "22px",
+                        animationDelay: `${i * 0.07}s`,
+                        position: "relative" as const,
+                        overflow: "hidden" as const,
+                      }}
+                      onClick={() => router.push(`/restaurant/${place.id}`)}
+                    >
+                      {isTop && (
+                        <>
+                          {/* Gold corner ribbon */}
+                          <div style={{
+                            position: "absolute",
+                            top: 0,
+                            right: 0,
+                            width: 0,
+                            height: 0,
+                            borderStyle: "solid",
+                            borderWidth: "0 52px 52px 0",
+                            borderColor: `transparent #f59e0b transparent transparent`,
+                          }} />
+                          <div style={{
+                            position: "absolute",
+                            top: "6px",
+                            right: "3px",
+                            fontSize: "11px",
+                            transform: "rotate(45deg)",
+                            color: "#030712",
+                            fontWeight: 900,
+                            fontFamily: "'DM Sans', sans-serif",
+                            lineHeight: 1,
+                          }}>★</div>
+                          {/* Top banner */}
+                          <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                            color: "#030712",
+                            fontSize: "10px",
+                            fontWeight: 800,
+                            padding: "4px 12px",
+                            borderRadius: "999px",
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase" as const,
+                            fontFamily: "'DM Sans', sans-serif",
+                            marginBottom: "10px",
+                            width: "fit-content",
+                          }}>
+                            <svg width="9" height="11" viewBox="0 0 10 13" fill="none">
+                              <path d="M0 0H10V10L8.5 8.5L7 10L5.5 8.5L4.5 10L3 8.5L1.5 10L0 8.5V0Z" fill="#030712" opacity="0.7"/>
+                              <path d="M2.5 4.5L4 6L7.5 2.5" stroke="#030712" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            Highest Rated
+                          </div>
+                        </>
+                      )}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" }}>
+                        <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: "17px", fontWeight: 700, letterSpacing: "-0.3px", flex: 1, paddingRight: "12px", color: text }}>{place.name}</h3>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: "8px", padding: "4px 10px" }}>
+                          <span style={{ fontSize: "12px" }}>⭐</span>
+                          <span style={{ color: "#f59e0b", fontWeight: 700, fontSize: "14px" }}>{place.rating}</span>
+                        </div>
+                      </div>
+                      <p style={{ color: muted, fontSize: "13px", marginBottom: "4px", textTransform: "capitalize" }}>{place.category}</p>
+                      <p style={{ color: muted, fontSize: "12px", marginBottom: "4px" }}>📍 {place.address}</p>
+                      <p style={{ color: muted, fontSize: "12px" }}>💬 {place.reviews.toLocaleString()} reviews</p>
+                      <TipMeter score={place.tipScore} dark={dark} isTop={isTop} />
+                      <p style={{ color: muted, fontSize: "12px", marginTop: "12px", fontStyle: "italic", lineHeight: 1.5 }}>&ldquo;{place.tip}&rdquo;</p>
                     </div>
-                  </div>
-                  <p style={{ color: muted, fontSize: "13px", marginBottom: "4px", textTransform: "capitalize" }}>{place.category}</p>
-                  <p style={{ color: muted, fontSize: "12px", marginBottom: "4px" }}>📍 {place.address}</p>
-                  <p style={{ color: muted, fontSize: "12px" }}>💬 {place.reviews.toLocaleString()} reviews</p>
-                  <TipMeter score={place.tipScore} dark={dark} />
-                  <p style={{ color: muted, fontSize: "12px", marginTop: "12px", fontStyle: "italic", lineHeight: 1.5 }}>&ldquo;{place.tip}&rdquo;</p>
-                </div>
-              ))}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            );
+          })()}
         </section>
 
         {/* Footer */}
