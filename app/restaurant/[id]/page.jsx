@@ -93,14 +93,29 @@ export default function RestaurantPage() {
     setSubmitting(false);
   }
 
-  const tipColor = place ? (place.tipScore >= 4 ? "#10b981" : place.tipScore >= 3 ? "#f59e0b" : "#ef4444") : "#f59e0b";
-  const tipLabel = place ? (place.tipScore >= 4 ? "Friendly" : place.tipScore >= 3 ? "Moderate" : "Pressured") : "Unknown";
-
   // Community stats
   const reportCount = reports.length;
   const avgScore = reportCount > 0
     ? Math.round((reports.reduce((sum, r) => sum + r.score, 0) / reportCount) * 10) / 10
     : null;
+
+  // Blended score — community data takes over as reports grow
+  const blended = (() => {
+    if (!place) return { score: 3, label: "Unknown", color: "#f59e0b", communityWeight: 0, confidence: 0 };
+    const googleScore = place.tipScore;
+    if (reportCount === 0) {
+      return { score: googleScore, communityWeight: 0, confidence: 1, source: "google" };
+    }
+    const communityWeight = reportCount >= 6 ? 0.9 : reportCount >= 3 ? 0.75 : 0.5;
+    const raw = avgScore * communityWeight + googleScore * (1 - communityWeight);
+    const score = Math.min(5, Math.max(1, Math.round(raw * 10) / 10));
+    const confidence = reportCount >= 6 ? 4 : reportCount >= 3 ? 3 : reportCount >= 1 ? 2 : 1;
+    return { score, communityWeight, confidence, source: reportCount >= 3 ? "community" : "mixed" };
+  })();
+
+  const displayScore = blended.score;
+  const tipColor = displayScore >= 4 ? "#10b981" : displayScore >= 3 ? "#f59e0b" : "#ef4444";
+  const tipLabel = displayScore >= 4 ? "Friendly" : displayScore >= 3 ? "Moderate" : "Pressured";
   const pctPressured = reportCount > 0
     ? Math.round((reports.filter(r => r.pressured).length / reportCount) * 100)
     : null;
@@ -153,15 +168,53 @@ export default function RestaurantPage() {
               <p style={{ color: "#6b7280", marginBottom: "6px" }}>📍 {place.address}</p>
               <p style={{ color: "#6b7280", marginBottom: "24px" }}>💬 {place.reviews?.toLocaleString()} reviews</p>
 
-              {/* Google-based Tip Score */}
-              <div style={{ background: "#0d1117", border: "1px solid #1f2937", borderRadius: "20px", padding: "24px", marginBottom: "20px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
-                  <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 700 }}>Tipping Culture Score</h2>
-                  <span style={{ fontSize: "20px", fontWeight: 800, color: tipColor }}>{place.tipScore}/5 · {tipLabel}</span>
+              {/* Blended Tip Score */}
+              <div style={{ background: "#0d1117", border: `1px solid ${tipColor === "#10b981" ? "rgba(16,185,129,0.25)" : tipColor === "#f59e0b" ? "rgba(245,158,11,0.25)" : "rgba(239,68,68,0.25)"}`, borderRadius: "20px", padding: "24px", marginBottom: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
+                  <div>
+                    <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>Tipping Culture Score</h2>
+                    {/* Confidence signal bars */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: "14px" }}>
+                        {[1,2,3,4].map(bar => (
+                          <div key={bar} style={{
+                            width: "4px",
+                            height: `${bar * 3 + 2}px`,
+                            borderRadius: "2px",
+                            background: bar <= blended.confidence ? tipColor : "#1f2937",
+                            transition: "background 0.3s",
+                          }} />
+                        ))}
+                      </div>
+                      <span style={{ fontSize: "10px", color: "#6b7280", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        {blended.confidence === 4 ? "High confidence" :
+                         blended.confidence === 3 ? "Good confidence" :
+                         blended.confidence === 2 ? "Early data" : "Google only"}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: "28px", fontWeight: 800, color: tipColor, fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>{displayScore}/5</div>
+                    <div style={{ fontSize: "13px", fontWeight: 700, color: tipColor, marginTop: "2px" }}>{tipLabel}</div>
+                  </div>
                 </div>
-                <ScoreBar score={place.tipScore} />
-                <p style={{ color: "#6b7280", fontSize: "13px", fontStyle: "italic", marginTop: "12px" }}>&ldquo;{place.tip}&rdquo;</p>
-                <p style={{ color: "#374151", fontSize: "11px", marginTop: "8px", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Based on Google review analysis</p>
+                <ScoreBar score={displayScore} />
+
+                {/* Source attribution */}
+                <div style={{ marginTop: "14px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  {reportCount > 0 && (
+                    <span style={{ fontSize: "11px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", color: "#10b981", padding: "3px 10px", borderRadius: "999px", fontWeight: 600 }}>
+                      {Math.round(blended.communityWeight * 100)}% community ({reportCount} report{reportCount !== 1 ? "s" : ""})
+                    </span>
+                  )}
+                  <span style={{ fontSize: "11px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.15)", color: "#f59e0b", padding: "3px 10px", borderRadius: "999px", fontWeight: 600 }}>
+                    {reportCount > 0 ? `${Math.round((1 - blended.communityWeight) * 100)}% Google analysis` : "Google review analysis"}
+                  </span>
+                </div>
+
+                {blended.source === "google" && place.tip && (
+                  <p style={{ color: "#6b7280", fontSize: "13px", fontStyle: "italic", marginTop: "12px" }}>&ldquo;{place.tip}&rdquo;</p>
+                )}
               </div>
 
               {/* Community Reports Section */}
