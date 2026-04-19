@@ -174,9 +174,9 @@ export default function Home() {
       <main style={{ minHeight: "100vh", color: text, fontFamily: "'DM Sans', sans-serif", transition: "color 0.3s", position: "relative", zIndex: 1 }}>
 
         {/* Header */}
-        <header style={{ borderBottom: `1px solid ${border}`, padding: "18px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100, transition: "all 0.3s" }}>
+        <header style={{ borderBottom: `1px solid ${border}`, padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100, transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-            <img src="/Tipcheck.png" alt="TipCheck" style={{ height: "72px", width: "auto" }} />
+            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "96px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
@@ -391,7 +391,7 @@ onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = muted}
         {/* Footer */}
         <footer style={{ borderTop: `1px solid ${border}`, padding: "40px 32px", textAlign: "center", background: dark ? "#0d1117" : "#ffffff", transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-            <img src="/Tipcheck.png" alt="TipCheck" style={{ height: "32px", width: "auto" }} />
+            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "32px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
           </div>
           <p style={{ color: muted, fontSize: "13px" }}>Empowering diners with transparent tipping culture data.</p>
           <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipCheck. All rights reserved.</p>
