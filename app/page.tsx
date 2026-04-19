@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FloatingParticles from "./components/FloatingParticles";
 import { useTheme } from "./components/useTheme";
@@ -111,6 +111,11 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState("");
+  const [reviews, setReviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/reviews").then(r => r.json()).then(d => setReviews(d.reviews || []));
+  }, []);
 
   const bg = dark ? "#030712" : "#f9fafb";
   const surface = dark ? "#0d1117" : "#ffffff";
@@ -388,10 +393,55 @@ export default function Home() {
           })()}
         </section>
 
+        {/* Community Reviews Widget */}
+        {reviews.length > 0 && (
+          <section style={{ borderTop: `1px solid ${border}`, padding: "48px 32px", background: dark ? "#0d1117" : "#f9fafb" }}>
+            <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "5px 14px" }}>
+                  <span style={{ fontSize: "12px" }}>💬</span>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b", letterSpacing: "0.1em", textTransform: "uppercase" }}>Community Reports</span>
+                </div>
+                <span style={{ color: muted, fontSize: "13px" }}>Latest from real diners</span>
+              </div>
+              <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px", scrollbarWidth: "none" }}>
+                {reviews.map((r: any) => {
+                  const scoreColor = r.score >= 4 ? "#10b981" : r.score >= 3 ? "#f59e0b" : "#ef4444";
+                  const timeAgo = (() => {
+                    const diff = Date.now() - new Date(r.created_at).getTime();
+                    const mins = Math.floor(diff / 60000);
+                    const hours = Math.floor(mins / 60);
+                    const days = Math.floor(hours / 24);
+                    if (days > 0) return `${days}d ago`;
+                    if (hours > 0) return `${hours}h ago`;
+                    return `${mins}m ago`;
+                  })();
+                  return (
+                    <div key={r.id} style={{ flexShrink: 0, width: "260px", background: dark ? "#111827" : "#ffffff", border: `1px solid ${border}`, borderRadius: "18px", padding: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontWeight: 700, fontSize: "13px", color: text, fontFamily: "'DM Sans', sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px" }}>{r.place_name}</span>
+                        <span style={{ background: scoreColor + "22", color: scoreColor, fontWeight: 800, fontSize: "12px", padding: "3px 10px", borderRadius: "999px", border: `1px solid ${scoreColor}44` }}>{r.score}/5</span>
+                      </div>
+                      {r.comment ? (
+                        <p style={{ color: muted, fontSize: "13px", lineHeight: 1.6, fontStyle: "italic", margin: 0 }}>"{r.comment}"</p>
+                      ) : (
+                        <p style={{ color: muted, fontSize: "13px", lineHeight: 1.6, margin: 0 }}>
+                          {r.pressured === false ? "No pressure to tip 👍" : r.pressured === true ? "Felt pressured to tip 😬" : "Tip experience reported"}
+                        </p>
+                      )}
+                      <span style={{ color: muted, fontSize: "11px", marginTop: "auto" }}>{timeAgo}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Footer */}
         <footer style={{ borderTop: `1px solid ${border}`, padding: "40px 32px", textAlign: "center", background: dark ? "#0d1117" : "#ffffff", transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-            <img src="/Tipcheck-dark.png" alt="TipCheck" style={{ height: "32px", width: "auto", filter: dark ? "brightness(0) invert(1)" : "none" }} />
+            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "32px", width: "auto" }} />
           </div>
           <p style={{ color: muted, fontSize: "13px" }}>Empowering diners with transparent tipping culture data.</p>
           <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipCheck. All rights reserved.</p>
