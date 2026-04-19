@@ -143,9 +143,8 @@ export default function RestaurantPage() {
       <FloatingParticles count={16} opacity={0.7} />
       <main style={{ minHeight: "100vh", color: "white", fontFamily: "'DM Sans', sans-serif", position: "relative", zIndex: 1 }}>
         <header style={{ borderBottom: "1px solid #111827", padding: "18px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "rgba(3,7,18,0.92)", backdropFilter: "blur(12px)", zIndex: 100 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => router.push("/")}>
-            <div style={{ width: "36px", height: "36px", background: "linear-gradient(135deg, #f59e0b, #d97706)", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>💸</div>
-            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "22px", fontWeight: 800, letterSpacing: "-0.5px" }}>Tip<span style={{ color: "#f59e0b" }}>Check</span></span>
+          <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/")}>
+            <img src="/Tipcheck.png" alt="TipCheck" style={{ height: "72px", width: "auto" }} />
           </div>
           <button onClick={() => router.push("/")} style={{ color: "#6b7280", fontSize: "14px", background: "none", border: "none", cursor: "pointer" }}>← Back to Search</button>
         </header>
