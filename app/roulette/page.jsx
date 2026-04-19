@@ -293,8 +293,8 @@ export default function RoulettePage() {
     setReelResults({ cuisine: "", vibe: "", name: "" });
   }
 
-  const tipColor = result ? (result.tipScore >= 7 ? "#10b981" : result.tipScore >= 4 ? "#f59e0b" : "#ef4444") : "#f59e0b";
-  const tipLabel = result ? (result.tipScore >= 7 ? "Friendly" : result.tipScore >= 4 ? "Moderate" : "Pressured") : "";
+  const tipColor = result ? (result.tipScore >= 4 ? "#10b981" : result.tipScore >= 3 ? "#f59e0b" : "#ef4444") : "#f59e0b";
+  const tipLabel = result ? (result.tipScore >= 4 ? "Friendly" : result.tipScore >= 3 ? "Moderate" : "Pressured") : "";
 
   return (
     <>
@@ -443,11 +443,11 @@ export default function RoulettePage() {
 
               <div>
                 <label style={{ fontSize: "11px", fontWeight: 700, color: muted, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: "8px" }}>
-                  💸 Min tip score: <span style={{ color: minTip >= 7 ? "#10b981" : minTip >= 4 ? "#f59e0b" : "#9ca3af" }}>{minTip}/10</span>
+                  💸 Min tip score: <span style={{ color: minTip >= 4 ? "#10b981" : minTip >= 3 ? "#f59e0b" : "#9ca3af" }}>{minTip}/5</span>
                   {minTip === 1 && <span style={{ color: muted, textTransform: "none", letterSpacing: 0, fontWeight: 400 }}> (any)</span>}
-                  {minTip >= 7 && <span style={{ color: "#10b981", textTransform: "none", letterSpacing: 0, fontWeight: 400 }}> (friendly only)</span>}
+                  {minTip >= 4 && <span style={{ color: "#10b981", textTransform: "none", letterSpacing: 0, fontWeight: 400 }}> (friendly only)</span>}
                 </label>
-                <input type="range" min="1" max="10" value={minTip} onChange={e => setMinTip(parseInt(e.target.value))} style={{ width: "100%", accentColor: "#f59e0b" }} />
+                <input type="range" min="1" max="5" value={minTip} onChange={e => setMinTip(parseInt(e.target.value))} style={{ width: "100%", accentColor: "#f59e0b" }} />
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#4b5563", marginTop: "4px" }}>
                   <span>Any place</span><span>Pressure-free only</span>
                 </div>
@@ -470,10 +470,10 @@ export default function RoulettePage() {
               <div style={{ background: dark ? "#0d1117" : "#f9fafb", borderRadius: "14px", padding: "16px 18px", marginBottom: "20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "8px" }}>
                   <span style={{ color: muted, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "10px" }}>Tip Culture</span>
-                  <span style={{ color: tipColor, fontWeight: 700 }}>{tipLabel} · {result.tipScore}/10</span>
+                  <span style={{ color: tipColor, fontWeight: 700 }}>{tipLabel} · {result.tipScore}/5</span>
                 </div>
                 <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "6px" }}>
-                  <div style={{ width: `${result.tipScore * 10}%`, background: tipColor, height: "6px", borderRadius: "999px" }} />
+                  <div style={{ width: `${result.tipScore * 20}%`, background: tipColor, height: "6px", borderRadius: "999px" }} />
                 </div>
                 {result.tip && <p style={{ color: muted, fontSize: "12px", fontStyle: "italic", marginTop: "10px" }}>&ldquo;{result.tip}&rdquo;</p>}
               </div>
