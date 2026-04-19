@@ -1,7 +1,7 @@
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY;
 
   if (!id) {
     return Response.json({ error: "ID is required" }, { status: 400 });
