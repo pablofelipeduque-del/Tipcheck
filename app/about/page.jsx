@@ -37,7 +37,7 @@ export default function AboutPage() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
-              {[["Discover", "/"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
+              {[["Home", "/"], ["Discover", "/discover"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
                 <a key={item} href={path}
                   style={{ color: item === "About" ? "#f59e0b" : dark ? "#e5e7eb" : "#1f2937", fontSize: "14px", fontWeight: 600, textDecoration: "none", transition: "all 0.2s", padding: "6px 14px", borderRadius: "999px", background: item === "About" ? (dark ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.1)") : "transparent" }}
                   onMouseEnter={e => { if (item !== "About") { e.currentTarget.style.background = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"; e.currentTarget.style.color = "#f59e0b"; }}}
