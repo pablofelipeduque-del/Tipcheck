@@ -6,12 +6,19 @@ import { useTheme } from "./components/useTheme";
 
 const categories = [
   { label: "All", icon: "🍽️" },
-  { label: "Restaurants", icon: "🥘" },
+  { label: "Italian", icon: "🍕" },
+  { label: "Mexican", icon: "🌮" },
+  { label: "Latin", icon: "🥘" },
+  { label: "Greek/Mediterranean", icon: "🫒" },
+  { label: "Asian", icon: "🥡" },
+  { label: "American", icon: "🍔" },
+  { label: "Indian", icon: "🍛" },
+  { label: "Japanese", icon: "🍣" },
+  { label: "Middle Eastern", icon: "🧆" },
+  { label: "Healthy/Salads", icon: "🥗" },
+  { label: "Bars & Pubs", icon: "🍺" },
+  { label: "Coffee & Cafés", icon: "☕" },
   { label: "Bakeries", icon: "🥐" },
-  { label: "Coffee", icon: "☕" },
-  { label: "Fast Food", icon: "🍔" },
-  { label: "Pizza", icon: "🍕" },
-  { label: "Sushi", icon: "🍣" },
   { label: "Desserts", icon: "🍰" },
 ];
 
