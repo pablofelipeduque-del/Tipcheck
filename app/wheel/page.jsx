@@ -395,7 +395,6 @@ export default function WheelPage() {
               {[
                 ["Discover", "/"],
                 ["Top Rated", "/top-rated"],
-                ["Dining Roulette", "/roulette"],
                 ["Food Wheel", "/wheel"],
                 ["About", "/about"],
               ].map(([item, path]) => (

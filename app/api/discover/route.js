@@ -25,12 +25,14 @@ function photoUrl(ref) {
 }
 
 async function searchCategory(query, zip) {
+  const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + " near " + zip)}&key=${GOOGLE_KEY}`;
   try {
-    const res = await fetch(
-      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + " near " + zip)}&key=${GOOGLE_KEY}`
-    );
+    const res = await fetch(url);
     const data = await res.json();
-    return (data.results || []).slice(0, 3).map((p) => ({
+    if (data.status && data.status !== "OK" && data.status !== "ZERO_RESULTS") {
+      console.error(`[Discover] Google API error for "${query}": ${data.status} — ${data.error_message || "no message"}`);
+    }
+    return (data.results || []).slice(0, 5).map((p) => ({
       place_id: p.place_id,
       name: p.name,
       address: p.formatted_address,
@@ -38,7 +40,8 @@ async function searchCategory(query, zip) {
       total_ratings: p.user_ratings_total || 0,
       photo: photoUrl(p.photos?.[0]?.photo_reference),
     }));
-  } catch {
+  } catch (err) {
+    console.error(`[Discover] Fetch failed for "${query}":`, err);
     return [];
   }
 }
@@ -47,10 +50,10 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const zip = searchParams.get("zip");
 
-  if (!zip) return Response.json({ categories: [], needsZip: true });
+  if (!zip) return Response.json({ categories: [], hiddenGems: [], greatTippingSpots: [], needsZip: true });
 
   // Fetch all categories in parallel
-  const results = await Promise.all(
+  const rawResults = await Promise.all(
     CATEGORIES.map((cat) => searchCategory(cat.query, zip))
   );
 
@@ -69,21 +72,46 @@ export async function GET(req) {
     }
   }
 
-  // Merge community data into results
+  // Merge community data into all places
+  const enrichPlace = (p) => {
+    const community = communityMap[p.place_id];
+    const communityScore = community
+      ? Math.round((community.scores.reduce((a, b) => a + b, 0) / community.scores.length) * 10) / 10
+      : null;
+    return { ...p, communityScore, communityReports: community ? community.scores.length : 0 };
+  };
+
+  // Build per-category results (top 3 shown in UI, but we enriched up to 5 for filtering)
   const categories = CATEGORIES.map((cat, i) => ({
     ...cat,
-    places: results[i].map((p) => {
-      const community = communityMap[p.place_id];
-      const communityScore = community
-        ? Math.round((community.scores.reduce((a, b) => a + b, 0) / community.scores.length) * 10) / 10
-        : null;
-      return {
-        ...p,
-        communityScore,
-        communityReports: community ? community.scores.length : 0,
-      };
-    }).filter((p) => p.name),
+    places: rawResults[i].map(enrichPlace).filter((p) => p.name).slice(0, 3),
   })).filter((cat) => cat.places.length > 0);
 
-  return Response.json({ categories, needsZip: false });
+  // All places across all categories (deduplicated) for hidden gems + great tipping spots
+  const seenIds = new Set();
+  const allPlaces = CATEGORIES.flatMap((_, i) => rawResults[i].map(enrichPlace).filter((p) => p.name))
+    .filter((p) => {
+      if (seenIds.has(p.place_id)) return false;
+      seenIds.add(p.place_id);
+      return true;
+    });
+
+  // Hidden Gems: low review count + high Google rating
+  const hiddenGems = allPlaces
+    .filter((p) => p.total_ratings > 0 && p.total_ratings <= 150 && p.rating >= 4.2)
+    .sort((a, b) => {
+      // prioritize places with community scores
+      const aScore = a.communityScore || 0;
+      const bScore = b.communityScore || 0;
+      return bScore - aScore || b.rating - a.rating;
+    })
+    .slice(0, 6);
+
+  // Great Tipping Spots: best TipCheck community scores
+  const greatTippingSpots = allPlaces
+    .filter((p) => p.communityScore !== null && p.communityScore >= 4.0)
+    .sort((a, b) => (b.communityScore || 0) - (a.communityScore || 0))
+    .slice(0, 6);
+
+  return Response.json({ categories, hiddenGems, greatTippingSpots, needsZip: false });
 }

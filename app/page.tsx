@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import FloatingParticles from "./components/FloatingParticles";
 import { useTheme } from "./components/useTheme";
@@ -119,10 +119,34 @@ export default function Home() {
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState("");
   const [reviews, setReviews] = useState<any[]>([]);
+  const [radarPlaces, setRadarPlaces] = useState<any[]>([]);
+  const [radarLoading, setRadarLoading] = useState(false);
+  const [radarDone, setRadarDone] = useState(false);
+  const [radarError, setRadarError] = useState("");
+  const radarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/reviews").then(r => r.json()).then(d => setReviews(d.reviews || []));
   }, []);
+
+  async function handleRadar() {
+    if (!navigator.geolocation) { setRadarError("Geolocation not supported by your browser."); return; }
+    setRadarLoading(true); setRadarError(""); setRadarDone(false);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(`/api/nearby?lat=${latitude}&lng=${longitude}`);
+          const data = await res.json();
+          setRadarPlaces(data.places || []);
+          setRadarDone(true);
+          setTimeout(() => radarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+        } catch { setRadarError("Could not load nearby places. Try again."); }
+        setRadarLoading(false);
+      },
+      () => { setRadarError("Location access denied. Allow location access and try again."); setRadarLoading(false); }
+    );
+  }
 
   const bg = dark ? "#030712" : "#f9fafb";
   const surface = dark ? "#0d1117" : "#ffffff";
@@ -192,7 +216,7 @@ export default function Home() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
-             {[["Home", "/"], ["Discover", "/discover"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
+             {[["Home", "/"], ["Discover", "/discover"], ["Top Rated", "/top-rated"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
   <a key={item} href={path}
     style={{ color: dark ? "#e5e7eb" : "#1f2937", fontSize: "14px", fontWeight: 600, textDecoration: "none", transition: "all 0.2s", padding: "6px 14px", borderRadius: "999px", background: "transparent" }}
     onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"; (e.currentTarget as HTMLAnchorElement).style.color = "#f59e0b"; }}
@@ -398,6 +422,104 @@ export default function Home() {
               </div>
             );
           })()}
+        </section>
+
+        {/* Near Me Radar */}
+        <section style={{ borderTop: `1px solid ${border}`, padding: "52px 32px", background: dark ? "#0d1117" : "#f9fafb" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+            <div ref={radarRef} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "20px", marginBottom: "28px" }}>
+              <div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "5px 14px", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "12px" }}>📡</span>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b", letterSpacing: "0.1em", textTransform: "uppercase" }}>Near Me Radar</span>
+                </div>
+                <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: text, letterSpacing: "-0.5px" }}>
+                  What's good around you <span style={{ color: "#f59e0b" }}>right now?</span>
+                </h2>
+                <p style={{ color: muted, fontSize: "14px", marginTop: "6px" }}>Uses your current location to find top-rated spots nearby.</p>
+              </div>
+              {!radarDone && (
+                <button
+                  onClick={handleRadar}
+                  disabled={radarLoading}
+                  style={{ display: "flex", alignItems: "center", gap: "10px", background: radarLoading ? (dark ? "#111827" : "#f3f4f6") : "#f59e0b", color: radarLoading ? muted : "#030712", fontWeight: 700, padding: "14px 24px", borderRadius: "14px", border: "none", cursor: radarLoading ? "not-allowed" : "pointer", fontSize: "15px", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s" }}
+                  onMouseEnter={(e: any) => { if (!radarLoading) { e.currentTarget.style.background = "#fbbf24"; e.currentTarget.style.transform = "translateY(-1px)"; }}}
+                  onMouseLeave={(e: any) => { e.currentTarget.style.background = radarLoading ? (dark ? "#111827" : "#f3f4f6") : "#f59e0b"; e.currentTarget.style.transform = ""; }}
+                >
+                  {radarLoading ? (
+                    <><span style={{ width: "16px", height: "16px", border: "2px solid #6b7280", borderTopColor: "#f59e0b", borderRadius: "50%", animation: "spin 0.7s linear infinite", display: "inline-block" }} /> Detecting...</>
+                  ) : (
+                    <><span>📍</span> Detect My Location</>
+                  )}
+                </button>
+              )}
+              {radarDone && (
+                <button onClick={() => { setRadarDone(false); setRadarPlaces([]); }}
+                  style={{ padding: "10px 18px", background: "transparent", color: muted, fontWeight: 600, fontSize: "13px", fontFamily: "'DM Sans', sans-serif", border: `1px solid ${border}`, borderRadius: "999px", cursor: "pointer" }}>
+                  🔄 Refresh
+                </button>
+              )}
+            </div>
+            {radarError && <p style={{ color: "#ef4444", fontSize: "13px", marginBottom: "16px" }}>{radarError}</p>}
+            {radarDone && radarPlaces.length === 0 && (
+              <p style={{ color: muted, fontSize: "14px" }}>No highly-rated places found within 3km. Try a different location.</p>
+            )}
+            {radarDone && radarPlaces.length > 0 && (
+              <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px", scrollbarWidth: "none" }}>
+                {radarPlaces.map((place: any) => {
+                  const hasComm = place.communityScore !== null;
+                  const scoreColor = !place.communityScore ? "#6b7280" : place.communityScore >= 4 ? "#10b981" : place.communityScore >= 3 ? "#f59e0b" : "#ef4444";
+                  return (
+                    <div key={place.place_id}
+                      onClick={() => router.push(`/restaurant/${place.place_id}`)}
+                      style={{ flexShrink: 0, width: "240px", background: surface, border: `1px solid ${border}`, borderRadius: "18px", overflow: "hidden", cursor: "pointer", transition: "all 0.3s" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "#f59e0b"; e.currentTarget.style.boxShadow = "0 16px 32px rgba(0,0,0,0.12)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.borderColor = border; e.currentTarget.style.boxShadow = ""; }}
+                    >
+                      <div style={{ width: "100%", height: "130px", background: dark ? "#1f2937" : "#e5e7eb", position: "relative", overflow: "hidden" }}>
+                        {place.photo
+                          ? <img src={place.photo} alt={place.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", opacity: 0.2 }}>🍽️</div>
+                        }
+                        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50px", background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }} />
+                        {place.rating && (
+                          <div style={{ position: "absolute", top: "8px", left: "8px", background: "rgba(0,0,0,0.7)", color: "#fbbf24", fontWeight: 800, fontSize: "11px", padding: "3px 8px", borderRadius: "999px" }}>
+                            ⭐ {place.rating}
+                          </div>
+                        )}
+                        {hasComm && (
+                          <div style={{ position: "absolute", top: "8px", right: "8px", background: scoreColor, color: "#fff", fontWeight: 800, fontSize: "10px", padding: "3px 8px", borderRadius: "999px" }}>
+                            TC {place.communityScore}/5
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ padding: "14px" }}>
+                        <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: "14px", fontWeight: 800, color: text, marginBottom: "3px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{place.name}</h3>
+                        <p style={{ color: muted, fontSize: "11px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: "8px" }}>{place.address}</p>
+                        {hasComm ? (
+                          <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "3px" }}>
+                            <div style={{ width: `${place.communityScore * 20}%`, background: scoreColor, height: "3px", borderRadius: "999px" }} />
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: "10px", color: muted }}>📡 No TC reports yet</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {!radarDone && !radarLoading && (
+              <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px" }}>
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} style={{ flexShrink: 0, width: "240px", height: "200px", background: dark ? "#111827" : "#f3f4f6", border: `1px solid ${border}`, borderRadius: "18px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "32px", opacity: 0.25 }}>📍</span>
+                    <span style={{ color: muted, fontSize: "12px", fontWeight: 600, opacity: 0.5 }}>Awaiting location</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
 
         {/* Community Reviews Widget */}

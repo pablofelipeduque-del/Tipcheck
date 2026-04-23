@@ -111,7 +111,7 @@ export default function TopRatedPage() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
-              {[["Home", "/"], ["Discover", "/discover"], ["Top Rated", "/top-rated"], ["Dining Roulette", "/roulette"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
+              {[["Home", "/"], ["Discover", "/discover"], ["Top Rated", "/top-rated"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
                 <a key={item} href={path} className="nav-link"
                   style={{ color: item === "Top Rated" ? "#f59e0b" : dark ? "#e5e7eb" : "#1f2937", background: item === "Top Rated" ? (dark ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.1)") : "transparent" }}
                 >{item}</a>
