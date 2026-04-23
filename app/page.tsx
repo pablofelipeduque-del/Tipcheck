@@ -71,7 +71,6 @@ function FoodIllustration() {
       <ellipse cx="210" cy="200" rx="130" ry="20" fill="rgba(245,158,11,0.1)" />
       <circle cx="210" cy="180" r="110" fill="white" stroke="#f3f4f6" strokeWidth="2"/>
       <circle cx="210" cy="180" r="90" fill="#fafafa" stroke="#f3f4f6" strokeWidth="1"/>
-      {/* Food items on plate */}
       <circle cx="185" cy="165" r="28" fill="#fde68a"/>
       <circle cx="185" cy="165" r="22" fill="#fbbf24"/>
       <circle cx="185" cy="165" r="14" fill="#f59e0b"/>
@@ -80,15 +79,12 @@ function FoodIllustration() {
       <circle cx="235" cy="175" r="10" fill="#ef4444"/>
       <ellipse cx="210" cy="195" rx="20" ry="10" fill="#86efac"/>
       <ellipse cx="210" cy="195" rx="14" ry="7" fill="#4ade80"/>
-      {/* Fork */}
       <rect x="340" y="100" width="6" height="80" rx="3" fill="#d1d5db"/>
       <rect x="338" y="100" width="2" height="30" rx="1" fill="#9ca3af"/>
       <rect x="342" y="100" width="2" height="30" rx="1" fill="#9ca3af"/>
       <rect x="346" y="100" width="2" height="30" rx="1" fill="#9ca3af"/>
-      {/* Knife */}
       <rect x="360" y="100" width="6" height="80" rx="3" fill="#d1d5db"/>
       <path d="M360 100 L366 100 L366 130 L360 140 Z" fill="#9ca3af"/>
-      {/* Steam */}
       <path d="M185 80 Q190 65 185 50" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6">
         <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite"/>
       </path>
@@ -298,9 +294,106 @@ export default function Home() {
             {error && <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "14px" }}>{error}</p>}
           </div>
 
-          {/* Illustration */}
-          <div className="float" style={{ flex: 1, minWidth: "280px", display: "flex", justifyContent: "center" }}>
-            <FoodIllustration />
+          {/* How It Works Panel */}
+          <div style={{ flex: 1, minWidth: "300px", maxWidth: "460px" }}>
+            {/* Header */}
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "5px 14px", marginBottom: "12px" }}>
+                <span style={{ fontSize: "11px" }}>🔬</span>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b", letterSpacing: "0.1em", textTransform: "uppercase" }}>Our Algorithm</span>
+              </div>
+              <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: dark ? "#ffffff" : "#111827", letterSpacing: "-0.5px", lineHeight: 1.2 }}>
+                How TipCheck builds your perfect recommendation
+              </h2>
+            </div>
+
+            {/* Steps */}
+            {[
+              {
+                icon: "🌐",
+                color: "#6366f1",
+                bg: "rgba(99,102,241,0.1)",
+                step: "01",
+                title: "Google Places scan",
+                body: "We query Google's database of 10M+ venues — pulling ratings, review counts, photos, and location data in real time for your area.",
+              },
+              {
+                icon: "💎",
+                color: "#f59e0b",
+                bg: "rgba(245,158,11,0.1)",
+                step: "02",
+                title: "Hidden Gems filter",
+                body: "Our algorithm flags venues with fewer than 150 reviews but a rating above 4.2 — places that are genuinely great but haven't gone mainstream yet.",
+                highlight: true,
+              },
+              {
+                icon: "📡",
+                color: "#10b981",
+                bg: "rgba(16,185,129,0.1)",
+                step: "03",
+                title: "TipCheck community layer",
+                body: "Real diner reports from our community are mapped onto each venue. We score tip pressure (1–5) and whether staff manipulated the checkout screen.",
+              },
+              {
+                icon: "✨",
+                color: "#f59e0b",
+                bg: "rgba(245,158,11,0.08)",
+                step: "04",
+                title: "Unified score",
+                body: "Google quality + community tip culture score = your final recommendation. You see everything — not just stars, but how it actually feels to eat there.",
+              },
+            ].map(({ icon, color, bg, step, title, body, highlight }, i) => (
+              <div key={step} style={{
+                display: "flex", gap: "14px", marginBottom: "14px",
+                background: highlight ? (dark ? "rgba(245,158,11,0.07)" : "rgba(245,158,11,0.05)") : (dark ? "rgba(255,255,255,0.03)" : "#ffffff"),
+                border: `1px solid ${highlight ? "rgba(245,158,11,0.25)" : (dark ? "#1f2937" : "#e5e7eb")}`,
+                borderRadius: "16px", padding: "16px",
+                animation: `fadeUp 0.4s ease ${i * 0.08}s both`,
+              }}>
+                <div style={{ flexShrink: 0, width: "40px", height: "40px", borderRadius: "12px", background: bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>
+                  {icon}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                    <span style={{ fontSize: "9px", fontWeight: 800, color, letterSpacing: "0.15em", textTransform: "uppercase" }}>STEP {step}</span>
+                    {highlight && <span style={{ fontSize: "9px", fontWeight: 800, color: "#f59e0b", letterSpacing: "0.1em", background: "rgba(245,158,11,0.15)", padding: "1px 7px", borderRadius: "999px" }}>EXCLUSIVE</span>}
+                  </div>
+                  <p style={{ fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 700, color: dark ? "#f3f4f6" : "#111827", marginBottom: "4px" }}>{title}</p>
+                  <p style={{ fontSize: "12px", color: dark ? "#6b7280" : "#9ca3af", lineHeight: 1.6 }}>{body}</p>
+                </div>
+              </div>
+            ))}
+
+            {/* Score preview */}
+            <div style={{ background: dark ? "#0d1117" : "#f9fafb", border: `1px solid ${dark ? "#1f2937" : "#e5e7eb"}`, borderRadius: "14px", padding: "14px 16px", marginTop: "4px" }}>
+              <p style={{ fontSize: "10px", fontWeight: 700, color: dark ? "#6b7280" : "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>Example TipCheck score</p>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "4px" }}>
+                    <span style={{ color: dark ? "#e5e7eb" : "#374151", fontWeight: 600 }}>Google ⭐</span>
+                    <span style={{ color: "#f59e0b", fontWeight: 700 }}>4.6 / 5</span>
+                  </div>
+                  <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "4px" }}>
+                    <div style={{ width: "92%", background: "#f59e0b", height: "4px", borderRadius: "999px" }} />
+                  </div>
+                </div>
+                <span style={{ color: dark ? "#374151" : "#d1d5db", fontSize: "16px", fontWeight: 300 }}>+</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "4px" }}>
+                    <span style={{ color: dark ? "#e5e7eb" : "#374151", fontWeight: 600 }}>TC Score</span>
+                    <span style={{ color: "#10b981", fontWeight: 700 }}>4.8 / 5</span>
+                  </div>
+                  <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "4px" }}>
+                    <div style={{ width: "96%", background: "#10b981", height: "4px", borderRadius: "999px" }} />
+                  </div>
+                </div>
+                <span style={{ color: dark ? "#374151" : "#d1d5db", fontSize: "16px", fontWeight: 300 }}>=</span>
+                <div style={{ background: "linear-gradient(135deg, #f59e0b, #10b981)", borderRadius: "10px", padding: "6px 12px", textAlign: "center" }}>
+                  <p style={{ fontSize: "9px", fontWeight: 800, color: "#030712", letterSpacing: "0.1em" }}>TOP PICK</p>
+                  <p style={{ fontFamily: "'Syne', sans-serif", fontSize: "16px", fontWeight: 900, color: "#030712", lineHeight: 1 }}>💎</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
