@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FloatingParticles from "./components/FloatingParticles";
 import { useTheme } from "./components/useTheme";
@@ -115,40 +115,50 @@ export default function Home() {
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState("");
   const [reviews, setReviews] = useState<any[]>([]);
-  const [radarPlaces, setRadarPlaces] = useState<any[]>([]);
-  const [radarLoading, setRadarLoading] = useState(false);
-  const [radarDone, setRadarDone] = useState(false);
-  const [radarError, setRadarError] = useState("");
-  const radarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/reviews").then(r => r.json()).then(d => setReviews(d.reviews || []));
   }, []);
-
-  async function handleRadar() {
-    if (!navigator.geolocation) { setRadarError("Geolocation not supported by your browser."); return; }
-    setRadarLoading(true); setRadarError(""); setRadarDone(false);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const res = await fetch(`/api/nearby?lat=${latitude}&lng=${longitude}`);
-          const data = await res.json();
-          setRadarPlaces(data.places || []);
-          setRadarDone(true);
-          setTimeout(() => radarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-        } catch { setRadarError("Could not load nearby places. Try again."); }
-        setRadarLoading(false);
-      },
-      () => { setRadarError("Location access denied. Allow location access and try again."); setRadarLoading(false); }
-    );
-  }
 
   const bg = dark ? "#030712" : "#f9fafb";
   const surface = dark ? "#0d1117" : "#ffffff";
   const border = dark ? "#1f2937" : "#e5e7eb";
   const text = dark ? "#ffffff" : "#111827";
   const muted = dark ? "#6b7280" : "#9ca3af";
+  async function handleNearMe() {
+    if (!navigator.geolocation) { setError("Geolocation not supported by your browser."); return; }
+    setIsLoading(true); setError("");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const geo = await fetch(`/api/geocode?lat=${latitude}&lng=${longitude}`);
+          const geoData = await geo.json();
+          const location = geoData.zip || geoData.city || `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+          setZip(location);
+          const category = activeCategory === "All" ? "restaurants" : activeCategory;
+          const res = await fetch(`/api/search?query=${encodeURIComponent(category + " in " + location)}`);
+          const data = await res.json();
+          if (data.error) { setError("Something went wrong."); setPlaces([]); }
+          else {
+            const seen = new Set();
+            const sorted = data.places
+              .filter((p: any) => {
+                if (!p.name?.trim()) return false;
+                const key = p.name.toLowerCase().trim();
+                if (seen.has(key)) return false;
+                seen.add(key); return true;
+              })
+              .sort((a: any, b: any) => b.tipScore - a.tipScore || b.rating - a.rating);
+            setPlaces(sorted);
+          }
+        } catch { setError("Could not detect location. Try again."); }
+        setIsLoading(false); setHasSearched(true);
+      },
+      () => { setError("Location access denied. Please allow location access."); setIsLoading(false); }
+    );
+  }
+
   async function handleSearch() {
     if (!zip.trim()) return;
     setIsLoading(true);
@@ -284,6 +294,16 @@ export default function Home() {
                 <button className="search-btn" onClick={handleSearch} disabled={isLoading}>
                   {isLoading ? "Searching..." : "Search"}
                 </button>
+                <button
+                  onClick={handleNearMe}
+                  disabled={isLoading}
+                  title="Use my current location"
+                  style={{ background: dark ? "rgba(255,255,255,0.07)" : "#f3f4f6", color: dark ? "#e5e7eb" : "#374151", fontWeight: 700, padding: "16px 20px", borderRadius: "14px", border: `1px solid ${dark ? "#1f2937" : "#e5e7eb"}`, cursor: isLoading ? "not-allowed" : "pointer", fontSize: "15px", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px" }}
+                  onMouseEnter={(e: any) => { if (!isLoading) { e.currentTarget.style.borderColor = "#f59e0b"; e.currentTarget.style.color = "#f59e0b"; }}}
+                  onMouseLeave={(e: any) => { e.currentTarget.style.borderColor = dark ? "#1f2937" : "#e5e7eb"; e.currentTarget.style.color = dark ? "#e5e7eb" : "#374151"; }}
+                >
+                  📍 Near Me
+                </button>
               </div>
             </div>
             {hasSearched && !error && (
@@ -294,106 +314,9 @@ export default function Home() {
             {error && <p style={{ color: "#ef4444", fontSize: "13px", marginTop: "14px" }}>{error}</p>}
           </div>
 
-          {/* How It Works Panel */}
-          <div style={{ flex: 1, minWidth: "300px", maxWidth: "460px" }}>
-            {/* Header */}
-            <div style={{ marginBottom: "20px" }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "5px 14px", marginBottom: "12px" }}>
-                <span style={{ fontSize: "11px" }}>🔬</span>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b", letterSpacing: "0.1em", textTransform: "uppercase" }}>Our Algorithm</span>
-              </div>
-              <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, color: dark ? "#ffffff" : "#111827", letterSpacing: "-0.5px", lineHeight: 1.2 }}>
-                How TipCheck builds your perfect recommendation
-              </h2>
-            </div>
-
-            {/* Steps */}
-            {[
-              {
-                icon: "🌐",
-                color: "#6366f1",
-                bg: "rgba(99,102,241,0.1)",
-                step: "01",
-                title: "Google Places scan",
-                body: "We query Google's database of 10M+ venues — pulling ratings, review counts, photos, and location data in real time for your area.",
-              },
-              {
-                icon: "💎",
-                color: "#f59e0b",
-                bg: "rgba(245,158,11,0.1)",
-                step: "02",
-                title: "Hidden Gems filter",
-                body: "Our algorithm flags venues with fewer than 150 reviews but a rating above 4.2 — places that are genuinely great but haven't gone mainstream yet.",
-                highlight: true,
-              },
-              {
-                icon: "📡",
-                color: "#10b981",
-                bg: "rgba(16,185,129,0.1)",
-                step: "03",
-                title: "TipCheck community layer",
-                body: "Real diner reports from our community are mapped onto each venue. We score tip pressure (1–5) and whether staff manipulated the checkout screen.",
-              },
-              {
-                icon: "✨",
-                color: "#f59e0b",
-                bg: "rgba(245,158,11,0.08)",
-                step: "04",
-                title: "Unified score",
-                body: "Google quality + community tip culture score = your final recommendation. You see everything — not just stars, but how it actually feels to eat there.",
-              },
-            ].map(({ icon, color, bg, step, title, body, highlight }, i) => (
-              <div key={step} style={{
-                display: "flex", gap: "14px", marginBottom: "14px",
-                background: highlight ? (dark ? "rgba(245,158,11,0.07)" : "rgba(245,158,11,0.05)") : (dark ? "rgba(255,255,255,0.03)" : "#ffffff"),
-                border: `1px solid ${highlight ? "rgba(245,158,11,0.25)" : (dark ? "#1f2937" : "#e5e7eb")}`,
-                borderRadius: "16px", padding: "16px",
-                animation: `fadeUp 0.4s ease ${i * 0.08}s both`,
-              }}>
-                <div style={{ flexShrink: 0, width: "40px", height: "40px", borderRadius: "12px", background: bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>
-                  {icon}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                    <span style={{ fontSize: "9px", fontWeight: 800, color, letterSpacing: "0.15em", textTransform: "uppercase" }}>STEP {step}</span>
-                    {highlight && <span style={{ fontSize: "9px", fontWeight: 800, color: "#f59e0b", letterSpacing: "0.1em", background: "rgba(245,158,11,0.15)", padding: "1px 7px", borderRadius: "999px" }}>EXCLUSIVE</span>}
-                  </div>
-                  <p style={{ fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 700, color: dark ? "#f3f4f6" : "#111827", marginBottom: "4px" }}>{title}</p>
-                  <p style={{ fontSize: "12px", color: dark ? "#6b7280" : "#9ca3af", lineHeight: 1.6 }}>{body}</p>
-                </div>
-              </div>
-            ))}
-
-            {/* Score preview */}
-            <div style={{ background: dark ? "#0d1117" : "#f9fafb", border: `1px solid ${dark ? "#1f2937" : "#e5e7eb"}`, borderRadius: "14px", padding: "14px 16px", marginTop: "4px" }}>
-              <p style={{ fontSize: "10px", fontWeight: 700, color: dark ? "#6b7280" : "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>Example TipCheck score</p>
-              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "4px" }}>
-                    <span style={{ color: dark ? "#e5e7eb" : "#374151", fontWeight: 600 }}>Google ⭐</span>
-                    <span style={{ color: "#f59e0b", fontWeight: 700 }}>4.6 / 5</span>
-                  </div>
-                  <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "4px" }}>
-                    <div style={{ width: "92%", background: "#f59e0b", height: "4px", borderRadius: "999px" }} />
-                  </div>
-                </div>
-                <span style={{ color: dark ? "#374151" : "#d1d5db", fontSize: "16px", fontWeight: 300 }}>+</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "4px" }}>
-                    <span style={{ color: dark ? "#e5e7eb" : "#374151", fontWeight: 600 }}>TC Score</span>
-                    <span style={{ color: "#10b981", fontWeight: 700 }}>4.8 / 5</span>
-                  </div>
-                  <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "4px" }}>
-                    <div style={{ width: "96%", background: "#10b981", height: "4px", borderRadius: "999px" }} />
-                  </div>
-                </div>
-                <span style={{ color: dark ? "#374151" : "#d1d5db", fontSize: "16px", fontWeight: 300 }}>=</span>
-                <div style={{ background: "linear-gradient(135deg, #f59e0b, #10b981)", borderRadius: "10px", padding: "6px 12px", textAlign: "center" }}>
-                  <p style={{ fontSize: "9px", fontWeight: 800, color: "#030712", letterSpacing: "0.1em" }}>TOP PICK</p>
-                  <p style={{ fontFamily: "'Syne', sans-serif", fontSize: "16px", fontWeight: 900, color: "#030712", lineHeight: 1 }}>💎</p>
-                </div>
-              </div>
-            </div>
+          {/* Illustration */}
+          <div className="float" style={{ flex: 1, minWidth: "280px", display: "flex", justifyContent: "center" }}>
+            <FoodIllustration />
           </div>
         </section>
 
@@ -515,104 +438,6 @@ export default function Home() {
               </div>
             );
           })()}
-        </section>
-
-        {/* Near Me Radar */}
-        <section style={{ borderTop: `1px solid ${border}`, padding: "52px 32px", background: dark ? "#0d1117" : "#f9fafb" }}>
-          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <div ref={radarRef} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "20px", marginBottom: "28px" }}>
-              <div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "5px 14px", marginBottom: "10px" }}>
-                  <span style={{ fontSize: "12px" }}>📡</span>
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b", letterSpacing: "0.1em", textTransform: "uppercase" }}>Near Me Radar</span>
-                </div>
-                <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(20px, 3vw, 28px)", fontWeight: 800, color: text, letterSpacing: "-0.5px" }}>
-                  What's good around you <span style={{ color: "#f59e0b" }}>right now?</span>
-                </h2>
-                <p style={{ color: muted, fontSize: "14px", marginTop: "6px" }}>Uses your current location to find top-rated spots nearby.</p>
-              </div>
-              {!radarDone && (
-                <button
-                  onClick={handleRadar}
-                  disabled={radarLoading}
-                  style={{ display: "flex", alignItems: "center", gap: "10px", background: radarLoading ? (dark ? "#111827" : "#f3f4f6") : "#f59e0b", color: radarLoading ? muted : "#030712", fontWeight: 700, padding: "14px 24px", borderRadius: "14px", border: "none", cursor: radarLoading ? "not-allowed" : "pointer", fontSize: "15px", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s" }}
-                  onMouseEnter={(e: any) => { if (!radarLoading) { e.currentTarget.style.background = "#fbbf24"; e.currentTarget.style.transform = "translateY(-1px)"; }}}
-                  onMouseLeave={(e: any) => { e.currentTarget.style.background = radarLoading ? (dark ? "#111827" : "#f3f4f6") : "#f59e0b"; e.currentTarget.style.transform = ""; }}
-                >
-                  {radarLoading ? (
-                    <><span style={{ width: "16px", height: "16px", border: "2px solid #6b7280", borderTopColor: "#f59e0b", borderRadius: "50%", animation: "spin 0.7s linear infinite", display: "inline-block" }} /> Detecting...</>
-                  ) : (
-                    <><span>📍</span> Detect My Location</>
-                  )}
-                </button>
-              )}
-              {radarDone && (
-                <button onClick={() => { setRadarDone(false); setRadarPlaces([]); }}
-                  style={{ padding: "10px 18px", background: "transparent", color: muted, fontWeight: 600, fontSize: "13px", fontFamily: "'DM Sans', sans-serif", border: `1px solid ${border}`, borderRadius: "999px", cursor: "pointer" }}>
-                  🔄 Refresh
-                </button>
-              )}
-            </div>
-            {radarError && <p style={{ color: "#ef4444", fontSize: "13px", marginBottom: "16px" }}>{radarError}</p>}
-            {radarDone && radarPlaces.length === 0 && (
-              <p style={{ color: muted, fontSize: "14px" }}>No highly-rated places found within 3km. Try a different location.</p>
-            )}
-            {radarDone && radarPlaces.length > 0 && (
-              <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px", scrollbarWidth: "none" }}>
-                {radarPlaces.map((place: any) => {
-                  const hasComm = place.communityScore !== null;
-                  const scoreColor = !place.communityScore ? "#6b7280" : place.communityScore >= 4 ? "#10b981" : place.communityScore >= 3 ? "#f59e0b" : "#ef4444";
-                  return (
-                    <div key={place.place_id}
-                      onClick={() => router.push(`/restaurant/${place.place_id}`)}
-                      style={{ flexShrink: 0, width: "240px", background: surface, border: `1px solid ${border}`, borderRadius: "18px", overflow: "hidden", cursor: "pointer", transition: "all 0.3s" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "#f59e0b"; e.currentTarget.style.boxShadow = "0 16px 32px rgba(0,0,0,0.12)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.borderColor = border; e.currentTarget.style.boxShadow = ""; }}
-                    >
-                      <div style={{ width: "100%", height: "130px", background: dark ? "#1f2937" : "#e5e7eb", position: "relative", overflow: "hidden" }}>
-                        {place.photo
-                          ? <img src={place.photo} alt={place.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "36px", opacity: 0.2 }}>🍽️</div>
-                        }
-                        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50px", background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }} />
-                        {place.rating && (
-                          <div style={{ position: "absolute", top: "8px", left: "8px", background: "rgba(0,0,0,0.7)", color: "#fbbf24", fontWeight: 800, fontSize: "11px", padding: "3px 8px", borderRadius: "999px" }}>
-                            ⭐ {place.rating}
-                          </div>
-                        )}
-                        {hasComm && (
-                          <div style={{ position: "absolute", top: "8px", right: "8px", background: scoreColor, color: "#fff", fontWeight: 800, fontSize: "10px", padding: "3px 8px", borderRadius: "999px" }}>
-                            TC {place.communityScore}/5
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ padding: "14px" }}>
-                        <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: "14px", fontWeight: 800, color: text, marginBottom: "3px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{place.name}</h3>
-                        <p style={{ color: muted, fontSize: "11px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: "8px" }}>{place.address}</p>
-                        {hasComm ? (
-                          <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "3px" }}>
-                            <div style={{ width: `${place.communityScore * 20}%`, background: scoreColor, height: "3px", borderRadius: "999px" }} />
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: "10px", color: muted }}>📡 No TC reports yet</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            {!radarDone && !radarLoading && (
-              <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "8px" }}>
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} style={{ flexShrink: 0, width: "240px", height: "200px", background: dark ? "#111827" : "#f3f4f6", border: `1px solid ${border}`, borderRadius: "18px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "32px", opacity: 0.25 }}>📍</span>
-                    <span style={{ color: muted, fontSize: "12px", fontWeight: 600, opacity: 0.5 }}>Awaiting location</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </section>
 
         {/* Community Reviews Widget */}

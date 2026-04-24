@@ -264,18 +264,38 @@ export default function DiscoverPage() {
     return () => clearTimeout(t);
   }, [winning]);
 
-  async function handleSearch() {
-    if (!inputZip.trim()) return;
+  async function handleSearch(overrideZip) {
+    const zipVal = overrideZip || inputZip.trim();
+    if (!zipVal) return;
     setLoading(true);
     setSearched(false);
-    setZip(inputZip.trim());
-    const res = await fetch(`/api/discover?zip=${encodeURIComponent(inputZip.trim())}`);
+    setZip(zipVal);
+    if (!overrideZip) setInputZip(zipVal);
+    const res = await fetch(`/api/discover?zip=${encodeURIComponent(zipVal)}`);
     const data = await res.json();
     setCategories(data.categories || []);
     setHiddenGems(data.hiddenGems || []);
     setGreatTippingSpots(data.greatTippingSpots || []);
     setLoading(false);
     setSearched(true);
+  }
+
+  async function handleLocateMe() {
+    if (!navigator.geolocation) return;
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const geo = await fetch(`/api/geocode?lat=${latitude}&lng=${longitude}`);
+          const geoData = await geo.json();
+          const location = geoData.zip || geoData.city || `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+          setInputZip(location);
+          await handleSearch(location);
+        } catch { setLoading(false); }
+      },
+      () => { setLoading(false); }
+    );
   }
 
   async function handleSpin() {
@@ -389,13 +409,22 @@ export default function DiscoverPage() {
                 />
               </div>
               <button
-                onClick={handleSearch}
+                onClick={() => handleSearch()}
                 disabled={loading}
                 style={{ background: "#f59e0b", color: "#030712", fontWeight: 700, padding: "14px 28px", borderRadius: "14px", border: "none", cursor: loading ? "not-allowed" : "pointer", fontSize: "15px", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap", opacity: loading ? 0.6 : 1, transition: "all 0.2s" }}
                 onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.background = "#fbbf24"; e.currentTarget.style.transform = "translateY(-1px)"; }}}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "#f59e0b"; e.currentTarget.style.transform = ""; }}
               >
                 {loading ? "Loading..." : "Discover →"}
+              </button>
+              <button
+                onClick={handleLocateMe}
+                disabled={loading}
+                style={{ background: "#f59e0b", color: "#030712", fontWeight: 700, padding: "14px 22px", borderRadius: "14px", border: "none", cursor: loading ? "not-allowed" : "pointer", fontSize: "15px", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap", opacity: loading ? 0.6 : 1, transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px" }}
+                onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.background = "#fbbf24"; e.currentTarget.style.transform = "translateY(-1px)"; }}}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "#f59e0b"; e.currentTarget.style.transform = ""; }}
+              >
+                📍 Locate Near Me
               </button>
             </div>
             {zip && !loading && (
@@ -419,12 +448,75 @@ export default function DiscoverPage() {
           )}
 
           {!loading && !searched && (
-            <div style={{ textAlign: "center", padding: "60px 0" }}>
-              <div style={{ fontSize: "64px", marginBottom: "20px" }}>🗺️</div>
-              <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "26px", fontWeight: 800, color: text, marginBottom: "12px" }}>Enter your ZIP to start</h2>
-              <p style={{ color: muted, fontSize: "15px", maxWidth: "380px", margin: "0 auto", lineHeight: 1.7 }}>
-                We'll find hidden gems, top tipping spots, and the best picks in every cuisine near you.
-              </p>
+            <div style={{ paddingBottom: "20px" }}>
+              {/* How It Works */}
+              <div style={{ display: "flex", gap: "40px", flexWrap: "wrap", alignItems: "flex-start" }}>
+                {/* Left: intro */}
+                <div style={{ flex: "1 1 280px", minWidth: "260px" }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "999px", padding: "5px 14px", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "11px" }}>🔬</span>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b", letterSpacing: "0.1em", textTransform: "uppercase" }}>Our Algorithm</span>
+                  </div>
+                  <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 800, color: text, letterSpacing: "-1px", lineHeight: 1.15, marginBottom: "16px" }}>
+                    How TipCheck builds your perfect recommendation
+                  </h2>
+                  <p style={{ color: muted, fontSize: "15px", lineHeight: 1.7, marginBottom: "24px" }}>
+                    We don't just show you star ratings. We layer Google's venue data with real community tipping reports to surface places that are both great <em>and</em> guilt-free.
+                  </p>
+                  {/* Score preview */}
+                  <div style={{ background: dark ? "#0d1117" : "#f9fafb", border: `1px solid ${dark ? "#1f2937" : "#e5e7eb"}`, borderRadius: "16px", padding: "18px 20px" }}>
+                    <p style={{ fontSize: "10px", fontWeight: 700, color: muted, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Example TipCheck score</p>
+                    <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                      <div style={{ flex: 1, minWidth: "100px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "5px" }}>
+                          <span style={{ color: dark ? "#e5e7eb" : "#374151", fontWeight: 600 }}>Google ⭐</span>
+                          <span style={{ color: "#f59e0b", fontWeight: 700 }}>4.6 / 5</span>
+                        </div>
+                        <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "5px" }}>
+                          <div style={{ width: "92%", background: "#f59e0b", height: "5px", borderRadius: "999px" }} />
+                        </div>
+                      </div>
+                      <span style={{ color: muted, fontSize: "18px" }}>+</span>
+                      <div style={{ flex: 1, minWidth: "100px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "5px" }}>
+                          <span style={{ color: dark ? "#e5e7eb" : "#374151", fontWeight: 600 }}>TC Score</span>
+                          <span style={{ color: "#10b981", fontWeight: 700 }}>4.8 / 5</span>
+                        </div>
+                        <div style={{ width: "100%", background: dark ? "#1f2937" : "#e5e7eb", borderRadius: "999px", height: "5px" }}>
+                          <div style={{ width: "96%", background: "#10b981", height: "5px", borderRadius: "999px" }} />
+                        </div>
+                      </div>
+                      <span style={{ color: muted, fontSize: "18px" }}>=</span>
+                      <div style={{ background: "linear-gradient(135deg, #f59e0b, #10b981)", borderRadius: "12px", padding: "8px 14px", textAlign: "center", flexShrink: 0 }}>
+                        <p style={{ fontSize: "9px", fontWeight: 800, color: "#030712", letterSpacing: "0.1em" }}>TOP PICK</p>
+                        <p style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 900, color: "#030712", lineHeight: 1, marginTop: "2px" }}>💎</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: steps */}
+                <div style={{ flex: "1 1 280px", minWidth: "260px" }}>
+                  {[
+                    { icon: "🌐", color: "#6366f1", bg: "rgba(99,102,241,0.1)", step: "01", title: "Google Places scan", body: "We query Google's database of 10M+ venues — pulling ratings, review counts, photos, and location data in real time for your area." },
+                    { icon: "💎", color: "#f59e0b", bg: "rgba(245,158,11,0.1)", step: "02", title: "Hidden Gems filter", body: "Our algorithm flags venues with fewer than 150 reviews but a rating above 4.2 — genuinely great places that haven't gone mainstream yet.", highlight: true },
+                    { icon: "📡", color: "#10b981", bg: "rgba(16,185,129,0.1)", step: "03", title: "TipCheck community layer", body: "Real diner reports are mapped onto each venue. We score tip pressure (1–5) and whether staff manipulated the checkout screen." },
+                    { icon: "✨", color: "#f59e0b", bg: "rgba(245,158,11,0.08)", step: "04", title: "Unified score", body: "Google quality + community tip culture = your recommendation. Not just stars — but how it actually feels to eat there." },
+                  ].map(({ icon, color, bg, step, title, body, highlight }, i) => (
+                    <div key={step} style={{ display: "flex", gap: "14px", marginBottom: "12px", background: highlight ? (dark ? "rgba(245,158,11,0.07)" : "rgba(245,158,11,0.05)") : (dark ? "rgba(255,255,255,0.03)" : "#ffffff"), border: `1px solid ${highlight ? "rgba(245,158,11,0.25)" : (dark ? "#1f2937" : "#e5e7eb")}`, borderRadius: "14px", padding: "14px", animation: `fadeUp 0.4s ease ${i * 0.08}s both` }}>
+                      <div style={{ flexShrink: 0, width: "38px", height: "38px", borderRadius: "10px", background: bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "17px" }}>{icon}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "3px" }}>
+                          <span style={{ fontSize: "9px", fontWeight: 800, color, letterSpacing: "0.12em", textTransform: "uppercase" }}>STEP {step}</span>
+                          {highlight && <span style={{ fontSize: "9px", fontWeight: 800, color: "#f59e0b", background: "rgba(245,158,11,0.15)", padding: "1px 6px", borderRadius: "999px" }}>EXCLUSIVE</span>}
+                        </div>
+                        <p style={{ fontFamily: "'Syne', sans-serif", fontSize: "13px", fontWeight: 700, color: text, marginBottom: "3px" }}>{title}</p>
+                        <p style={{ fontSize: "12px", color: muted, lineHeight: 1.55 }}>{body}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
