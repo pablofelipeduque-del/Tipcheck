@@ -7,6 +7,7 @@ const GOOGLE_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY;
 //   ?lat=<number>&lng=<number>&radius=<meters, optional, default 3000>
 
 export async function GET(request) {
+  const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
   const { searchParams } = new URL(request.url);
   const lat = searchParams.get("lat");
   const lng = searchParams.get("lng");
@@ -87,9 +88,9 @@ export async function GET(request) {
     );
 
     // Plain array — no wrapper object (matches /api/places shape for FlutterFlow)
-    return Response.json(places.filter((p) => p.name && p.name.trim()));
+    return Response.json(places.filter((p) => p.name && p.name.trim()), { headers });
   } catch (err) {
     console.error("[NearbyPlaces] Error:", err);
-    return Response.json({ error: "Failed to fetch nearby places" }, { status: 500 });
+    return Response.json({ error: "Failed to fetch nearby places" }, { status: 500, headers });
   }
 }
