@@ -1,6 +1,7 @@
 const GOOGLE_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY;
 
 export async function GET(request) {
+  const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query");
 
@@ -70,8 +71,8 @@ export async function GET(request) {
     );
 
     // Return plain array — no wrapper object
-    return Response.json(places.filter((p) => p.name && p.name.trim()));
+    return Response.json(places.filter((p) => p.name && p.name.trim()), { headers });
   } catch {
-    return Response.json({ error: "Failed to fetch places" }, { status: 500 });
+    return Response.json({ error: "Failed to fetch places" }, { status: 500, headers });
   }
 }
