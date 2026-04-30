@@ -66,6 +66,7 @@ export async function GET(request) {
           rating: place.rating || 0,
           tipScore,
           tip: tipSummary,
+          tipColor: tipScore <= 2 ? '#FF4444' : tipScore === 3 ? '#F5A623' : '#4CAF50',
         };
       })
     );
