@@ -12,6 +12,7 @@ export async function GET(request) {
   const lat = searchParams.get("lat");
   const lng = searchParams.get("lng");
   const radius = searchParams.get("radius") || "3000";
+  const keyword = searchParams.get("keyword") || "";
 
   if (!lat || !lng) {
     return Response.json({ error: "lat and lng are required" }, { status: 400 });
@@ -19,7 +20,7 @@ export async function GET(request) {
 
   try {
     const nearbyRes = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=restaurant&key=${GOOGLE_KEY}`
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&keyword=${keyword}&type=restaurant&key=${GOOGLE_KEY}`
     );
     const nearbyData = await nearbyRes.json();
 
