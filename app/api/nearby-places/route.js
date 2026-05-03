@@ -30,8 +30,20 @@ if (zip) {
   const keyword = searchParams.get("keyword") || "";
 
   if ((!lat || !lng) && !zip) {
-    return Response.json({ error: "lat and lng are required" }, { status: 400 });
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+             request.headers.get('x-real-ip') || '';
+  if (ip) {
+    const ipRes = await fetch(`https://ipapi.co/${ip}/json/`);
+    const ipData = await ipRes.json();
+    if (ipData.latitude && ipData.longitude) {
+      finalLat = ipData.latitude;
+      finalLng = ipData.longitude;
+    }
   }
+  if (!finalLat || !finalLng) {
+    return Response.json({ error: "Could not determine location" }, { status: 400 });
+  }
+}
 
   try {
     const nearbyRes = await fetch(
