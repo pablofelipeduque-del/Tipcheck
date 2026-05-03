@@ -83,6 +83,7 @@ export async function GET(request) {
           rating: place.rating || 0,
           tipScore,
           tip: tipSummary,
+          reviews: place.user_ratings_total || 0,
           tipColor: tipScore <= 2 ? '#FF4444' : tipScore === 3 ? '#F5A623' : '#4CAF50',
         };
       })
