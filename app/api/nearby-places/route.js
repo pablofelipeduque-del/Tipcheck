@@ -12,15 +12,30 @@ export async function GET(request) {
   const lat = searchParams.get("lat");
   const lng = searchParams.get("lng");
   const radius = searchParams.get("radius") || "3000";
+  const zip = searchParams.get("zip") || "";
+
+let finalLat = lat;
+let finalLng = lng;
+
+if (zip) {
+  const geoRes = await fetch(
+    `https://maps.googleapis.com/maps/api/geocode/json?address=${zip}&key=${GOOGLE_KEY}`
+  );
+  const geoData = await geoRes.json();
+  if (geoData.results?.[0]?.geometry?.location) {
+    finalLat = geoData.results[0].geometry.location.lat;
+    finalLng = geoData.results[0].geometry.location.lng;
+  }
+}
   const keyword = searchParams.get("keyword") || "";
 
-  if (!lat || !lng) {
+  if ((!lat || !lng) && !zip) {
     return Response.json({ error: "lat and lng are required" }, { status: 400 });
   }
 
   try {
     const nearbyRes = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&keyword=${keyword}&type=restaurant&key=${GOOGLE_KEY}`
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${finalLat},${finalLng}&radius=${radius}&keyword=${keyword}&type=restaurant&key=${GOOGLE_KEY}`
     );
     const nearbyData = await nearbyRes.json();
 
