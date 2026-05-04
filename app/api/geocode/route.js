@@ -1,25 +1,19 @@
-const GOOGLE_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY;
-
-export async function GET(req) {
-  const { searchParams } = new URL(req.url);
-  const lat = searchParams.get("lat");
-  const lng = searchParams.get("lng");
-
-  if (!lat || !lng) return Response.json({ zip: null, error: "Missing coords" });
+export async function GET(request) {
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip')?.trim() ||
+    '';
 
   try {
-    const res = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_KEY}`
-    );
+    const res = await fetch(`https://freeipapi.com/api/json/${ip}`);
     const data = await res.json();
-    const components = data.results?.[0]?.address_components || [];
-    const zipComp = components.find((c) => c.types.includes("postal_code"));
-    const cityComp = components.find((c) => c.types.includes("locality"));
+
     return Response.json({
-      zip: zipComp?.short_name || null,
-      city: cityComp?.long_name || null,
+      lat: data.latitude,
+      lng: data.longitude,
+      city: data.cityName,
     });
-  } catch (err) {
-    return Response.json({ zip: null, error: "Geocode failed" });
+  } catch (e) {
+    return Response.json({ lat: 36.1069, lng: -115.1694, city: 'Las Vegas' });
   }
 }
