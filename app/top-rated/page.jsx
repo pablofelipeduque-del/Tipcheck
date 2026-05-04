@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FloatingParticles from "../components/FloatingParticles";
+import NavigateButton from "../components/NavigateButton";
 import { useTheme } from "../components/useTheme";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
@@ -263,6 +264,10 @@ export default function TopRatedPage() {
                           &ldquo;{place.tip}&rdquo;
                         </p>
                       )}
+
+                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "10px" }}>
+                        <NavigateButton placeId={place.id} name={place.name} address={place.address} size="md" />
+                      </div>
                     </div>
                   </div>
                 );

@@ -3,6 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
 import FloatingParticles from "../../components/FloatingParticles";
+import NavigateButton from "../../components/NavigateButton";
 import { useTheme } from "../../components/useTheme";
 
 function ScoreBar({ score }) {
@@ -165,7 +166,10 @@ export default function RestaurantPage() {
                 <span style={{ color: "#f59e0b", fontSize: "20px", fontWeight: 700 }}>⭐ {place.rating}</span>
               </div>
               <p style={{ color: "#6b7280", marginBottom: "6px" }}>📍 {place.address}</p>
-              <p style={{ color: "#6b7280", marginBottom: "24px" }}>💬 {place.reviews?.toLocaleString()} reviews</p>
+              <p style={{ color: "#6b7280", marginBottom: "16px" }}>💬 {place.reviews?.toLocaleString()} reviews</p>
+              <div style={{ marginBottom: "24px" }}>
+                <NavigateButton placeId={id} name={place.name} address={place.address} size="lg" />
+              </div>
 
               {/* Blended Tip Score */}
               <div style={{ background: "#0d1117", border: `1px solid ${tipColor === "#10b981" ? "rgba(16,185,129,0.25)" : tipColor === "#f59e0b" ? "rgba(245,158,11,0.25)" : "rgba(239,68,68,0.25)"}`, borderRadius: "20px", padding: "24px", marginBottom: "20px" }}>

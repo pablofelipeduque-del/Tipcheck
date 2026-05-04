@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import FloatingParticles from "./components/FloatingParticles";
+import NavigateButton from "./components/NavigateButton";
 import { useTheme } from "./components/useTheme";
 
 const categories = [
@@ -432,6 +433,9 @@ export default function Home() {
                       <p style={{ color: muted, fontSize: "12px" }}>💬 {place.reviews.toLocaleString()} reviews</p>
                       <TipMeter score={place.tipScore} dark={dark} isTop={isTop} />
                       <p style={{ color: muted, fontSize: "12px", marginTop: "12px", fontStyle: "italic", lineHeight: 1.5 }}>&ldquo;{place.tip}&rdquo;</p>
+                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
+                        <NavigateButton placeId={place.id} name={place.name} address={place.address} size="md" />
+                      </div>
                     </div>
                   );
                 })}

@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import FloatingParticles from "../components/FloatingParticles";
+import NavigateButton from "../components/NavigateButton";
 import { useTheme } from "../components/useTheme";
 
 const SEG_COLORS = ["#f59e0b", "#10b981", "#6366f1"];
@@ -704,6 +705,7 @@ export default function WheelPage() {
                                 <span>⭐</span>
                                 <span style={{ color: "#f59e0b", fontWeight: 700 }}>{place.rating}</span>
                               </span>
+                              <NavigateButton placeId={place.id} name={place.name} address={place.address} size="sm" />
                             </div>
                           </div>
                         </div>

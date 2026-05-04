@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import FloatingParticles from "../components/FloatingParticles";
+import NavigateButton from "../components/NavigateButton";
 import { useTheme } from "../components/useTheme";
 
 // ── Shared nav (no Dining Roulette) ──────────────────────────────────────────
@@ -65,6 +66,9 @@ function PlaceCard({ place, dark, border, surface, text, muted, router, badge })
             <span style={{ color: muted, fontSize: "11px", fontWeight: 600 }}>No community reports yet</span>
           </div>
         )}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
+          <NavigateButton placeId={place.place_id} name={place.name} address={place.address} size="sm" />
+        </div>
       </div>
     </div>
   );
@@ -680,6 +684,7 @@ export default function DiscoverPage() {
                       style={{ flex: 1, padding: "14px", background: "#f59e0b", color: "#030712", fontWeight: 700, fontSize: "15px", fontFamily: "'DM Sans', sans-serif", border: "none", borderRadius: "14px", cursor: "pointer" }}>
                       See Full Details →
                     </button>
+                    <NavigateButton placeId={result.id} name={result.name} address={result.address} size="lg" style={{ borderRadius: "14px" }} />
                     <button onClick={handleReset}
                       style={{ padding: "14px 20px", background: "transparent", color: muted, fontWeight: 600, fontSize: "14px", fontFamily: "'DM Sans', sans-serif", border: `1px solid ${border}`, borderRadius: "14px", cursor: "pointer" }}>
                       🔄 Spin Again
