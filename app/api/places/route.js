@@ -72,7 +72,7 @@ export async function GET(request) {
     );
 
     // Return plain array — no wrapper object
-    return Response.json(places.filter((p) => p.name && p.name.trim()), { headers });
+    return Response.json(places.filter((p) => p.name && p.name.trim()).sort((a, b) => b.tipScore - a.tipScore), { headers });
   } catch {
     return Response.json({ error: "Failed to fetch places" }, { status: 500, headers });
   }
