@@ -9,7 +9,7 @@ export async function GET(request) {
 
   try {
     const res = await fetch(
-      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&key=${apiKey}`
+      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,rating,reviews&key=${apiKey}`
     );
     const data = await res.json();
     const reviews = data.result?.reviews || [];
