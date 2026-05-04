@@ -76,7 +76,7 @@ export async function GET(request) {
       })
     );
 
-    return Response.json({ places: places.filter((p) => p.name && p.name.trim()) });
+    return Response.json({ places: places.filter((p) => p.name && p.name.trim()).sort((a, b) => b.tipScore - a.tipScore) });
   } catch (error) {
     return Response.json({ error: "Failed to fetch places" }, { status: 500 });
   }
