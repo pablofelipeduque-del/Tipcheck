@@ -60,7 +60,7 @@ export async function GET(request) {
         }
 
         return {
-          id: place.place_id,
+          placeId: place.place_id,
           name: place.name,
           address: place.formatted_address,
           rating: place.rating || 0,
