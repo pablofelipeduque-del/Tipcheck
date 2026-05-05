@@ -8,7 +8,9 @@ export async function GET(request) {
   if (!query) {
     return Response.json({ error: "Query is required" }, { status: 400 });
   }
-
+if (!/\d/.test(query)) {
+  return Response.json([], { headers });
+}
   try {
     const searchRes = await fetch(
       `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${GOOGLE_KEY}`
