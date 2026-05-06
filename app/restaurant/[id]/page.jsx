@@ -2,6 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
+import AuthButton from "../../components/AuthButton";
 import FloatingParticles from "../../components/FloatingParticles";
 import NavigateButton from "../../components/NavigateButton";
 import { useTheme } from "../../components/useTheme";
@@ -21,6 +22,70 @@ function StatPill({ icon, label, value, highlight }) {
       <div style={{ fontSize: "22px", marginBottom: "8px" }}>{icon}</div>
       <div style={{ fontFamily: "'Syne', sans-serif", fontSize: "22px", fontWeight: 800, color: highlight || "white", marginBottom: "4px" }}>{value}</div>
       <div style={{ color: "#6b7280", fontSize: "12px", fontWeight: 500 }}>{label}</div>
+    </div>
+  );
+}
+
+
+function GoogleReviewsSection({ placeId }) {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [limit, setLimit] = useState(5);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/place-reviews?placeId=${placeId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        setReviews(d.reviews || []);
+        setLoading(false);
+      })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [placeId]);
+
+  if (loading || !reviews.length) return null;
+
+  const visible = reviews.slice(0, limit);
+
+  return (
+    <div className="fade-up" style={{ background: "#0d1117", border: "1px solid #1f2937", borderRadius: "20px", padding: "24px", marginBottom: "20px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
+        <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 700 }}>Recent Google Reviews</h2>
+        <span style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: "999px", padding: "4px 12px", fontSize: "12px", color: "#818cf8", fontWeight: 700 }}>
+          {reviews.length} from Google
+        </span>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: reviews.length > 1 ? "8px" : "0" }}>
+        {visible.map((r, i) => (
+          <div key={i} className="comment-card">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "8px" }}>
+              <span style={{ fontSize: "13px", fontWeight: 700, color: "#e5e7eb", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.author}</span>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: "#fbbf24", flexShrink: 0 }}>⭐ {r.rating}</span>
+            </div>
+            <p style={{ fontSize: "11px", color: "#6b7280", marginBottom: "8px" }}>{r.time}</p>
+            <p style={{ fontSize: "13px", color: "#9ca3af", lineHeight: 1.6 }}>{r.text}</p>
+          </div>
+        ))}
+      </div>
+
+      {reviews.length > 1 && (
+        <div style={{ display: "flex", alignItems: "center", gap: "14px", paddingTop: "12px", borderTop: "1px solid #1f2937" }}>
+          <label style={{ fontSize: "11px", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600, whiteSpace: "nowrap" }}>
+            Showing {limit} of {reviews.length}
+          </label>
+          <input
+            type="range"
+            min="1"
+            max={reviews.length}
+            value={limit}
+            onChange={(e) => setLimit(parseInt(e.target.value))}
+            style={{ flex: 1, accentColor: "#818cf8" }}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -147,7 +212,10 @@ export default function RestaurantPage() {
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/")}>
             <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
           </div>
-          <button onClick={() => router.push("/")} style={{ color: "#6b7280", fontSize: "14px", background: "none", border: "none", cursor: "pointer" }}>← Back to Search</button>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <button onClick={() => router.push("/")} style={{ color: "#6b7280", fontSize: "14px", background: "none", border: "none", cursor: "pointer" }}>← Back to Search</button>
+            <AuthButton dark={true} />
+          </div>
         </header>
 
         <div style={{ maxWidth: "760px", margin: "0 auto", padding: "40px 24px" }}>
@@ -292,6 +360,8 @@ export default function RestaurantPage() {
                   )}
                 </div>
               )}
+
+              <GoogleReviewsSection placeId={id} />
 
               {/* Report Form */}
               {!submitted ? (

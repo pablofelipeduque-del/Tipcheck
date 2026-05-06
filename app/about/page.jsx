@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import AuthButton from "../components/AuthButton";
 import FloatingParticles from "../components/FloatingParticles";
 import { useTheme } from "../components/useTheme";
 
@@ -52,6 +53,7 @@ export default function AboutPage() {
               </button>
               <span style={{ fontSize: "14px" }}>🌙</span>
             </div>
+            <AuthButton dark={dark} />
           </div>
         </header>
 

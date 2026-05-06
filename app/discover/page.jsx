@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import AuthButton from "../components/AuthButton";
 import FloatingParticles from "../components/FloatingParticles";
 import NavigateButton from "../components/NavigateButton";
 import { useTheme } from "../components/useTheme";
@@ -383,6 +384,7 @@ export default function DiscoverPage() {
               </button>
               <span>🌙</span>
             </div>
+            <AuthButton dark={dark} />
           </div>
         </header>
 

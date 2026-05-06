@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import AuthButton from "./components/AuthButton";
 import FloatingParticles from "./components/FloatingParticles";
 import NavigateButton from "./components/NavigateButton";
 import { useTheme } from "./components/useTheme";
 
 const categories = [
-  { label: "All", icon: "🍽️" },
   { label: "Italian", icon: "🍕" },
   { label: "Mexican", icon: "🌮" },
   { label: "Latin", icon: "🥘" },
@@ -110,7 +110,7 @@ export default function Home() {
   const router = useRouter();
   const { dark, toggle: toggleDark } = useTheme();
   const [zip, setZip] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] = useState("Italian");
   const [places, setPlaces] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -137,7 +137,7 @@ export default function Home() {
           const geoData = await geo.json();
           const location = geoData.zip || geoData.city || `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
           setZip(location);
-          const category = activeCategory === "All" ? "restaurants" : activeCategory;
+          const category = activeCategory;
           const res = await fetch(`/api/search?query=${encodeURIComponent(category + " in " + location)}`);
           const data = await res.json();
           if (data.error) { setError("Something went wrong."); setPlaces([]); }
@@ -166,7 +166,7 @@ export default function Home() {
     setHasSearched(false);
     setError("");
     try {
-      const category = activeCategory === "All" ? "restaurants" : activeCategory;
+      const category = activeCategory;
       const res = await fetch(`/api/search?query=${encodeURIComponent(category + " in " + zip)}`);
       const data = await res.json();
       if (data.error) { setError("Something went wrong."); setPlaces([]); }
@@ -239,6 +239,7 @@ export default function Home() {
               </button>
               <span style={{ fontSize: "14px" }}>🌙</span>
             </div>
+            <AuthButton dark={dark} />
           </div>
         </header>
 
