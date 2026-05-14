@@ -4,6 +4,7 @@ export async function GET(request) {
   const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query");
+const sortMode = searchParams.get("sortMode") || "both";
 
   if (!query) {
     return Response.json({ error: "Query is required" }, { status: 400 });
@@ -77,7 +78,15 @@ tipColor: tipScore <= 2 ? '#FF4444' : tipScore === 3 ? '#F5A623' : '#4CAF50',
     );
 
     // Return plain array — no wrapper object
-    return Response.json(places.filter((p) => p.name && p.name.trim()).sort((a, b) => b.tipScore - a.tipScore), { headers });
+    return Response.json(
+  places
+    .filter((p) => p.name && p.name.trim())
+    .sort((a, b) => {
+      if (sortMode === "food") return b.rating - a.rating;
+      return (b.rating + b.tipScore) - (a.rating + a.tipScore);
+    }),
+  { headers }
+);
   } catch {
     return Response.json({ error: "Failed to fetch places" }, { status: 500, headers });
   }
