@@ -78,15 +78,18 @@ tipColor: tipScore <= 2 ? '#FF4444' : tipScore === 3 ? '#F5A623' : '#4CAF50',
     );
 
     // Return plain array — no wrapper object
-    return Response.json(
-  places
-    .filter((p) => p.name && p.name.trim())
-    .sort((a, b) => {
-      if (sortMode === "food") return b.rating - a.rating;
-      return (b.rating + b.tipScore) - (a.rating + a.tipScore);
-    }),
-  { headers }
-);
+const sorted = places
+  .filter((p) => p.name && p.name.trim())
+  .sort((a, b) => {
+    if (sortMode === "food") return b.rating - a.rating;
+    return (b.rating + b.tipScore) - (a.rating + a.tipScore);
+  });
+
+sorted.forEach((place) => {
+  place.isTopRated = place.rating >= 4.8;
+});
+
+return Response.json(sorted, { headers });
   } catch {
     return Response.json({ error: "Failed to fetch places" }, { status: 500, headers });
   }
