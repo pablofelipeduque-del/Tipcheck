@@ -109,11 +109,11 @@ export default function TopRatedPage() {
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100, transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/")}>
-            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "34px", fontWeight: 800, letterSpacing: "-1.5px", color: dark ? "#ffffff" : "#111827", lineHeight: 1 }}>Tip<span style={{ color: "#f59e0b" }}>Sense</span></span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
-              {[["Home", "/"], ["Discover", "/discover"], ["Top Rated", "/top-rated"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
+              {[["Home", "/"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
                 <a key={item} href={path} className="nav-link"
                   style={{ color: item === "Top Rated" ? "#f59e0b" : dark ? "#e5e7eb" : "#1f2937", background: item === "Top Rated" ? (dark ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.1)") : "transparent" }}
                 >{item}</a>
@@ -290,10 +290,10 @@ export default function TopRatedPage() {
         {/* Footer */}
         <footer style={{ borderTop: `1px solid ${border}`, padding: "40px 32px", textAlign: "center", background: dark ? "#0d1117" : "#ffffff", transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "32px", width: "auto" }} />
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.8px", color: dark ? "#ffffff" : "#111827" }}>Tip<span style={{ color: "#f59e0b" }}>Sense</span></span>
           </div>
           <p style={{ color: muted, fontSize: "13px" }}>Empowering diners with transparent tipping culture data.</p>
-          <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipCheck. All rights reserved.</p>
+          <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipSense. All rights reserved.</p>
         </footer>
 
       </main>

@@ -210,7 +210,7 @@ export default function RestaurantPage() {
       <main style={{ minHeight: "100vh", color: "white", fontFamily: "'DM Sans', sans-serif", position: "relative", zIndex: 1 }}>
         <header style={{ borderBottom: "1px solid #111827", padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "rgba(3,7,18,0.92)", backdropFilter: "blur(12px)", zIndex: 100 }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/")}>
-            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "34px", fontWeight: 800, letterSpacing: "-1.5px", color: dark ? "#ffffff" : "#111827", lineHeight: 1 }}>Tip<span style={{ color: "#f59e0b" }}>Sense</span></span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <button onClick={() => router.push("/")} style={{ color: "#6b7280", fontSize: "14px", background: "none", border: "none", cursor: "pointer" }}>← Back to Search</button>

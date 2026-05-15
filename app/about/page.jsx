@@ -34,11 +34,11 @@ export default function AboutPage() {
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100 }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/")}>
-            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "34px", fontWeight: 800, letterSpacing: "-1.5px", color: dark ? "#ffffff" : "#111827", lineHeight: 1 }}>Tip<span style={{ color: "#f59e0b" }}>Sense</span></span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
-              {[["Home", "/"], ["Discover", "/discover"], ["Top Rated", "/top-rated"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
+              {[["Home", "/"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
                 <a key={item} href={path}
                   style={{ color: item === "About" ? "#f59e0b" : dark ? "#e5e7eb" : "#1f2937", fontSize: "14px", fontWeight: 600, textDecoration: "none", transition: "all 0.2s", padding: "6px 14px", borderRadius: "999px", background: item === "About" ? (dark ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.1)") : "transparent" }}
                   onMouseEnter={e => { if (item !== "About") { e.currentTarget.style.background = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"; e.currentTarget.style.color = "#f59e0b"; }}}
@@ -67,7 +67,7 @@ export default function AboutPage() {
               Tipping should be a <span style={{ color: "#f59e0b" }}>choice,</span><br />not a trap.
             </h1>
             <p style={{ color: muted, fontSize: "18px", lineHeight: 1.8, maxWidth: "620px", margin: "0 auto" }}>
-              TipCheck was built because we believe in one simple truth — <strong style={{ color: text }}>workers deserve fair wages paid by their employers,</strong> not extracted from customers through guilt and social pressure.
+              TipSense was built because we believe in one simple truth — <strong style={{ color: text }}>workers deserve fair wages paid by their employers,</strong> not extracted from customers through guilt and social pressure.
             </p>
           </div>
         </section>
@@ -98,10 +98,10 @@ export default function AboutPage() {
             {[
               { icon: "💰", title: "Fair Wages Are Not Optional", body: "Employers have a responsibility to pay their staff honest wages. Tipping culture exists because businesses pushed that responsibility onto customers. We think that's wrong." },
               { icon: "🙅", title: "No Pressure, Ever", body: "No one should feel manipulated, guilted, or watched while deciding whether to tip. A tip is a gesture of appreciation — not a fee, not a tax, not an expectation." },
-              { icon: "🔍", title: "Transparency Matters", body: "Before you walk into a restaurant, bakery, or café, you deserve to know what kind of tipping experience awaits you. That's exactly what TipCheck provides." },
+              { icon: "🔍", title: "Transparency Matters", body: "Before you walk into a restaurant, bakery, or café, you deserve to know what kind of tipping experience awaits you. That's exactly what TipSense provides." },
               { icon: "⚖️", title: "Real Service Deserves Real Tips", body: "We are not anti-tipping. We are anti-abuse. When someone truly serves you, reward them generously. But that should always be your choice — not a forced transaction." },
               { icon: "📢", title: "Your Voice Counts", body: "Every review, every score, every piece of feedback on TipCheck helps other diners make informed decisions and sends a clear message to businesses about what customers expect." },
-              { icon: "🤝", title: "Built for Diners, By Diners", body: "TipCheck is a community tool. We use real customer reviews to calculate honest tipping culture scores — no paid placements, no business influence, no agenda except yours." },
+              { icon: "🤝", title: "Built for Diners, By Diners", body: "TipSense is a community tool. We use real customer reviews to calculate honest tipping culture scores — no paid placements, no business influence, no agenda except yours." },
             ].map(({ icon, title, body }, i) => (
               <div key={title} className="value-card fade-up" style={{ background: surface, border: `1px solid ${border}`, animationDelay: `${0.1 + i * 0.08}s` }}>
                 <div style={{ fontSize: "32px", marginBottom: "14px" }}>{icon}</div>
@@ -136,10 +136,10 @@ export default function AboutPage() {
         {/* Footer */}
         <footer style={{ borderTop: `1px solid ${border}`, padding: "40px 32px", textAlign: "center", background: dark ? "#0d1117" : "#ffffff" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "32px", width: "auto" }} />
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.8px", color: dark ? "#ffffff" : "#111827" }}>Tip<span style={{ color: "#f59e0b" }}>Sense</span></span>
           </div>
           <p style={{ color: muted, fontSize: "13px" }}>Empowering diners with transparent tipping culture data.</p>
-          <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipCheck. All rights reserved.</p>
+          <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipSense. All rights reserved.</p>
         </footer>
 
       </main>

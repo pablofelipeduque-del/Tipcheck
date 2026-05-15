@@ -390,7 +390,7 @@ export default function WheelPage() {
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100, transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/")}>
-            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "34px", fontWeight: 800, letterSpacing: "-1.5px", color: dark ? "#ffffff" : "#111827", lineHeight: 1 }}>Tip<span style={{ color: "#f59e0b" }}>Sense</span></span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "24px" }}>
@@ -427,6 +427,19 @@ export default function WheelPage() {
           <p style={{ color: muted, fontSize: "16px", maxWidth: "480px", margin: "0 auto", lineHeight: 1.7 }}>
             Add up to 3 places, throw in who suggested each one, spin — and the winner earns the right to say &ldquo;I told you so.&rdquo;
           </p>
+        </section>
+
+        {/* How it works */}
+        <section style={{ maxWidth: "780px", margin: "0 auto", padding: "0 32px 24px" }}>
+          <div style={{ background: dark ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.04)", border: "1px solid rgba(99,102,241,0.22)", borderRadius: "14px", padding: "16px 20px", display: "flex", gap: "14px", alignItems: "flex-start" }}>
+            <span style={{ fontSize: "26px", flexShrink: 0, lineHeight: 1 }}>🎡</span>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 800, color: "#818cf8", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "6px" }}>How it works</p>
+              <p style={{ color: muted, fontSize: "13.5px", lineHeight: 1.6, margin: 0 }}>
+                Add up to three places you and your group are debating — restaurants, cafés, bars, whatever. Tag who suggested each one. Hit spin, the wheel picks the winner, and the person who suggested it gets bragging rights. Great for tonight&apos;s &ldquo;where should we eat&rdquo; standoff.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Main content */}
@@ -724,10 +737,10 @@ export default function WheelPage() {
         {/* Footer */}
         <footer style={{ borderTop: `1px solid ${border}`, padding: "40px 32px", textAlign: "center", background: dark ? "#0d1117" : "#ffffff", transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "32px", width: "auto" }} />
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.8px", color: dark ? "#ffffff" : "#111827" }}>Tip<span style={{ color: "#f59e0b" }}>Sense</span></span>
           </div>
           <p style={{ color: muted, fontSize: "13px" }}>Empowering diners with transparent tipping culture data.</p>
-          <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipCheck. All rights reserved.</p>
+          <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipSense. All rights reserved.</p>
         </footer>
 
       </main>

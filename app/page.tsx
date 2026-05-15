@@ -111,6 +111,7 @@ export default function Home() {
   const { dark, toggle: toggleDark } = useTheme();
   const [zip, setZip] = useState("");
   const [activeCategory, setActiveCategory] = useState("Italian");
+  const [searchMode, setSearchMode] = useState("tip"); // "tip" = sort by tipScore, "normal" = sort by rating
   const [places, setPlaces] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -150,7 +151,10 @@ export default function Home() {
                 if (seen.has(key)) return false;
                 seen.add(key); return true;
               })
-              .sort((a: any, b: any) => b.tipScore - a.tipScore || b.rating - a.rating);
+              .sort((a: any, b: any) => searchMode === "tip"
+                ? b.tipScore - a.tipScore || b.rating - a.rating
+                : b.rating - a.rating || b.tipScore - a.tipScore
+              );
             setPlaces(sorted);
           }
         } catch { setError("Could not detect location. Try again."); }
@@ -180,7 +184,10 @@ export default function Home() {
             seen.add(key);
             return true;
           })
-          .sort((a: any, b: any) => b.tipScore - a.tipScore || b.rating - a.rating);
+          .sort((a: any, b: any) => searchMode === "tip"
+                ? b.tipScore - a.tipScore || b.rating - a.rating
+                : b.rating - a.rating || b.tipScore - a.tipScore
+              );
         setPlaces(sorted);
       }
     } catch { setError("Could not connect."); setPlaces([]); }
@@ -219,11 +226,11 @@ export default function Home() {
         {/* Header */}
         <header style={{ borderBottom: `1px solid ${border}`, padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: dark ? "rgba(3,7,18,0.92)" : "rgba(249,250,251,0.92)", backdropFilter: "blur(12px)", zIndex: 100, transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "96px", width: "auto" }} />
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "34px", fontWeight: 800, letterSpacing: "-1.5px", color: dark ? "#ffffff" : "#111827", lineHeight: 1 }}>Tip<span style={{ color: "#f59e0b" }}>Sense</span></span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <nav style={{ display: "flex", gap: "28px" }}>
-             {[["Home", "/"], ["Discover", "/discover"], ["Top Rated", "/top-rated"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
+             {[["Home", "/"], ["Food Wheel", "/wheel"], ["About", "/about"]].map(([item, path]) => (
   <a key={item} href={path}
     style={{ color: dark ? "#e5e7eb" : "#1f2937", fontSize: "14px", fontWeight: 600, textDecoration: "none", transition: "all 0.2s", padding: "6px 14px", borderRadius: "999px", background: "transparent" }}
     onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"; (e.currentTarget as HTMLAnchorElement).style.color = "#f59e0b"; }}
@@ -278,10 +285,65 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Step 2 – ZIP */}
+            {/* Step 2 – Search Mode */}
+            <div style={{ marginBottom: "16px", background: dark ? "rgba(255,255,255,0.05)" : "#ffffff", border: `1px solid ${border}`, borderRadius: "16px", padding: "18px 20px" }}>
+              <p style={{ fontSize: "12px", fontWeight: 700, color: dark ? "#e5e7eb" : "#374151", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>
+                2 · Choose how to rank results
+              </p>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => setSearchMode("tip")}
+                  style={{
+                    flex: "1 1 200px",
+                    padding: "12px 18px",
+                    borderRadius: "14px",
+                    border: `1px solid ${searchMode === "tip" ? "#f59e0b" : border}`,
+                    background: searchMode === "tip" ? "#f59e0b" : (dark ? "rgba(255,255,255,0.05)" : "#f9fafb"),
+                    color: searchMode === "tip" ? "#030712" : (dark ? "#e5e7eb" : "#374151"),
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    textAlign: "left",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+                    <span style={{ fontSize: "16px" }}>💬</span>
+                    <span>Tip culture</span>
+                  </div>
+                  <span style={{ fontSize: "11px", fontWeight: 500, opacity: 0.85 }}>Ranks by tipping-friendly first</span>
+                </button>
+                <button
+                  onClick={() => setSearchMode("normal")}
+                  style={{
+                    flex: "1 1 200px",
+                    padding: "12px 18px",
+                    borderRadius: "14px",
+                    border: `1px solid ${searchMode === "normal" ? "#f59e0b" : border}`,
+                    background: searchMode === "normal" ? "#f59e0b" : (dark ? "rgba(255,255,255,0.05)" : "#f9fafb"),
+                    color: searchMode === "normal" ? "#030712" : (dark ? "#e5e7eb" : "#374151"),
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    textAlign: "left",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+                    <span style={{ fontSize: "16px" }}>⭐</span>
+                    <span>Normal Search</span>
+                  </div>
+                  <span style={{ fontSize: "11px", fontWeight: 500, opacity: 0.85 }}>Ranks by Google star rating</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Step 3 – ZIP */}
             <div style={{ marginBottom: "24px", background: dark ? "rgba(255,255,255,0.05)" : "#ffffff", border: `1px solid ${border}`, borderRadius: "16px", padding: "18px 20px" }}>
               <p style={{ fontSize: "12px", fontWeight: 700, color: dark ? "#e5e7eb" : "#374151", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>
-                2 · Enter your location
+                3 · Enter your location
               </p>
               <div style={{ display: "flex", gap: "12px", maxWidth: "520px" }}>
                 <input
@@ -350,12 +412,16 @@ export default function Home() {
             </div>
           )}
           {!isLoading && places.length > 0 && (() => {
-            const maxScore = Math.max(...places.map((p) => p.tipScore));
+            const maxScore = searchMode === "tip"
+              ? Math.max(...places.map((p) => p.tipScore))
+              : Math.max(...places.map((p) => p.rating));
             return (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
                 {places.map((place, i) => {
                   // Always highlight top 1-2 after sort, as long as they're not the worst score
-                  const isTop = i < 2 && place.tipScore === maxScore && maxScore > 1;
+                  const isTop = searchMode === "tip"
+                    ? (i < 2 && place.tipScore === maxScore && maxScore > 1)
+                    : (i < 2 && place.rating === maxScore && maxScore > 0);
                   return (
                     <div key={place.id} className={`card card-animate${isTop ? " top-card" : ""}`}
                       style={{
@@ -432,8 +498,12 @@ export default function Home() {
                       <p style={{ color: muted, fontSize: "13px", marginBottom: "4px", textTransform: "capitalize" }}>{place.category}</p>
                       <p style={{ color: muted, fontSize: "12px", marginBottom: "4px" }}>📍 {place.address}</p>
                       <p style={{ color: muted, fontSize: "12px" }}>💬 {place.reviews.toLocaleString()} reviews</p>
-                      <TipMeter score={place.tipScore} dark={dark} isTop={isTop} />
-                      <p style={{ color: muted, fontSize: "12px", marginTop: "12px", fontStyle: "italic", lineHeight: 1.5 }}>&ldquo;{place.tip}&rdquo;</p>
+                      {searchMode === "tip" && (
+                        <>
+                          <TipMeter score={place.tipScore} dark={dark} isTop={isTop} />
+                          <p style={{ color: muted, fontSize: "12px", marginTop: "12px", fontStyle: "italic", lineHeight: 1.5 }}>&ldquo;{place.tip}&rdquo;</p>
+                        </>
+                      )}
                       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
                         <NavigateButton placeId={place.id} name={place.name} address={place.address} size="md" />
                       </div>
@@ -493,10 +563,10 @@ export default function Home() {
         {/* Footer */}
         <footer style={{ borderTop: `1px solid ${border}`, padding: "40px 32px", textAlign: "center", background: dark ? "#0d1117" : "#ffffff", transition: "all 0.3s" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-            <img src={dark ? "/Tipcheck.png" : "/Tipcheck-dark.png"} alt="TipCheck" style={{ height: "32px", width: "auto" }} />
+            <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.8px", color: dark ? "#ffffff" : "#111827" }}>Tip<span style={{ color: "#f59e0b" }}>Sense</span></span>
           </div>
           <p style={{ color: muted, fontSize: "13px" }}>Empowering diners with transparent tipping culture data.</p>
-          <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipCheck. All rights reserved.</p>
+          <p style={{ color: border, fontSize: "12px", marginTop: "24px" }}>© 2026 TipSense. All rights reserved.</p>
         </footer>
 
       </main>
