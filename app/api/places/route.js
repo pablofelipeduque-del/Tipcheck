@@ -86,8 +86,10 @@ const sorted = places
     return (b.rating + b.tipScore) - (a.rating + a.tipScore);
   });
 
-sorted.forEach((place) => {
+  sorted.forEach((place) => {
   place.isTopRated = place.rating >= 4.8;
+  place.isLowPressure = (place.tipScore || 3) >= 4;
+});
 });
 
 return Response.json(sorted, { headers });
