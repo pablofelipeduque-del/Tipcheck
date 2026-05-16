@@ -74,6 +74,7 @@ tipColor: tipScore <= 2 ? '#FF4444' : tipScore === 3 ? '#F5A623' : '#4CAF50',
         isHighPressure: tipScore <= 2,
         isAverageTipping: tipScore === 3,
         isLowPressure: tipScore > 3,
+        isTopRated: (place.rating || 0) >= 4.5,
         };
       })
     );
